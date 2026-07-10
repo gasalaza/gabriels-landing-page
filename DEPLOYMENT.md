@@ -128,6 +128,8 @@ The backend optionally emails you when someone submits the contact form, using [
 4. **`onboarding@resend.dev`** works immediately but can only send to your own Resend-verified email. After `gasalaza.com` DNS is live, verify the domain in Resend and switch `CONTACT_NOTIFY_FROM` to `noreply@gasalaza.com` (or similar).
 5. If any of the three vars are empty/missing, email silently no-ops — the contact form still works and persists to the DB.
 
+**Local testing:** Copy `.env.example` → `.env` at the repo root and set `RESEND_API_KEY` + `CONTACT_NOTIFY_TO`. Restart `npm run dev` — the backend auto-loads the repo-root `.env` on startup. (Production uses Railway-injected env vars instead.)
+
 ---
 
 ## 9. Secret Hygiene
