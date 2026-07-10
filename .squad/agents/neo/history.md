@@ -21,3 +21,5 @@ Gabriel Salazar's personal portfolio / landing page: a public React + TypeScript
 - **Phase 4 supply-chain pinning review (2026-07-09T22:09:23-0600):** Reviewed Tank's SHA-pinned GitHub Actions + Docker images (PR #21). Confirmed mechanical pins only (no tampering), multi-arch index digests used (node:22-alpine, caddy:2-alpine), Dependabot docker ecosystem added, scoped to CI/build. 🟢 GREEN. Approved PR #21 for merge (d91af04).
 
 - **Pre-deploy security audit + re-gates (2026-07-10):** Audited OWASP Web Top 10, OWASP LLM Top 10, and DDoS posture. Baseline strong (11 🟢); OWASP LLM N/A (no AI surface); found 3 🔴 + 4 🟡. Re-gated PR #36 🟢, PR #37 🟢, and PR #38 🟡 GO after CORS/Origin, trusted-IP rate limiting, daily cap, timeouts, audit logging, session cleanup, and body-limit remediation. Future LiteRT/on-device-AI demo requires fresh LLM/CSP review.
+
+- **LinkedIn-launch security gate (2026-07-10):** Authored honest category-level Built Secure copy and RFC 9116 `security.txt` spec. Reviewed PR #41 🟢 for CSP-compatible inline JSON-LD and PR #43 🟢 for safe `/.well-known` Caddy handling with headers preserved, no dotfile over-exposure, and no traversal issue.
