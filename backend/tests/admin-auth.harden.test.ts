@@ -483,6 +483,103 @@ describe('auth rate limiting', () => {
   });
 });
 
+describe('__pa cookie HMAC signing', () => {
+  beforeEach(() => {
+    setupEnv();
+    resetDatabase();
+  });
+
+  afterEach(() => {
+    resetDatabase();
+    teardownEnv();
+  });
+
+  it('signs the __pa cookie and round-trips successfully through callback', async () => {
+    const app = createApp({ githubAuth: createMockGitHubAuth({ login: 'gasalaza' }) });
+
+    const { state, paCookie } = await initiateOAuth(app);
+
+    // Verify the cookie value contains a dot-separated signature
+    const cookieValue = paCookie.split(';')[0]!.replace('__pa=', '');
+    const decoded = decodeURIComponent(cookieValue);
+    const lastDot = decoded.lastIndexOf('.');
+    expect(lastDot).toBeGreaterThan(0);
+    const payload = decoded.slice(0, lastDot);
+    const parsed = JSON.parse(payload);
+    expect(parsed.state).toBe(state);
+    expect(parsed.codeVerifier).toBeTruthy();
+
+    // Complete the callback — must succeed
+    const callbackRes = await callCallback(app, state, paCookie);
+    expect(callbackRes.status).toBe(302);
+    expect(callbackRes.headers.location).toBe('http://localhost:5173/admin');
+
+    // Session issued
+    const sessionCookie = getCookieValue(callbackRes, '__session');
+    expect(sessionCookie).toBeTruthy();
+  });
+
+  it('rejects a __pa cookie with a tampered signature', async () => {
+    const app = createApp({ githubAuth: createMockGitHubAuth({ login: 'gasalaza' }) });
+
+    const { state, paCookie } = await initiateOAuth(app);
+
+    // Tamper with the signature by replacing last few chars
+    const cookieValue = paCookie.split(';')[0]!; // __pa=...
+    const decoded = decodeURIComponent(cookieValue.replace('__pa=', ''));
+    const lastDot = decoded.lastIndexOf('.');
+    const payload = decoded.slice(0, lastDot);
+    const tamperedCookie = `__pa=${encodeURIComponent(payload + '.AAAA_tampered_sig')}`;
+
+    const res = await request(app)
+      .get(`/api/admin/auth/github/callback?code=mock-code&state=${encodeURIComponent(state)}`)
+      .set('Cookie', tamperedCookie)
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('http://localhost:5173/admin?auth=error');
+
+    // No session issued
+    const sessionCookie = getCookieValue(res, '__session');
+    expect(sessionCookie).toBeUndefined();
+  });
+
+  it('rejects a __pa cookie with modified payload (state forged)', async () => {
+    const app = createApp({ githubAuth: createMockGitHubAuth({ login: 'gasalaza' }) });
+
+    const { paCookie } = await initiateOAuth(app);
+
+    // Extract the original signature, replace the payload
+    const cookieValue = paCookie.split(';')[0]!.replace('__pa=', '');
+    const decoded = decodeURIComponent(cookieValue);
+    const lastDot = decoded.lastIndexOf('.');
+    const originalSig = decoded.slice(lastDot + 1);
+    const forgedPayload = JSON.stringify({ state: 'forged-state', codeVerifier: 'forged-verifier' });
+    const forgedCookie = `__pa=${encodeURIComponent(forgedPayload + '.' + originalSig)}`;
+
+    const res = await request(app)
+      .get('/api/admin/auth/github/callback?code=mock-code&state=forged-state')
+      .set('Cookie', forgedCookie)
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('http://localhost:5173/admin?auth=error');
+  });
+
+  it('preserves __pa cookie attributes (path, httpOnly, sameSite, maxAge)', async () => {
+    const app = createApp({ githubAuth: createMockGitHubAuth({}) });
+
+    const res = await request(app).get('/api/admin/auth/github').redirects(0);
+    const cookies = res.headers['set-cookie'] as string[];
+    const paCookie = cookies.find((c: string) => c.startsWith('__pa='))!;
+
+    expect(paCookie).toContain('Path=/api/admin/auth');
+    expect(paCookie.toLowerCase()).toContain('httponly');
+    expect(paCookie.toLowerCase()).toContain('samesite=lax');
+    expect(paCookie).toContain('Max-Age=600');
+  });
+});
+
 describe('error handler', () => {
   beforeEach(() => {
     setupEnv();

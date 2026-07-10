@@ -21,8 +21,14 @@ function sha256Hex(data: string): string {
   return createHash('sha256').update(data).digest('hex');
 }
 
-function hmacSign(data: string, secret: string): string {
+export function hmacSign(data: string, secret: string): string {
   return createHmac('sha256', secret).update(data).digest('base64url');
+}
+
+export function hmacVerify(data: string, signature: string, secret: string): boolean {
+  const expected = hmacSign(data, secret);
+  if (expected.length !== signature.length) return false;
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 }
 
 function constantTimeEqual(a: string, b: string): boolean {
