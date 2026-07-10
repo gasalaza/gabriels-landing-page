@@ -237,6 +237,28 @@ describe('admin auth', () => {
     });
   });
 
+  describe('cookie path scoping', () => {
+    it('sets __csrf with Path=/ (SPA-readable) and __session with Path=/api/admin (httpOnly)', async () => {
+      const app = createApp({ githubAuth: createMockGitHubAuth({ login: 'gasalaza' }) });
+
+      const { state, paCookie } = await initiateOAuth(app);
+      const callbackRes = await callCallback(app, state, paCookie);
+      expect(callbackRes.status).toBe(302);
+
+      const cookies = callbackRes.headers['set-cookie'] as string[];
+
+      const csrfSetCookie = cookies.find((c: string) => c.startsWith('__csrf='));
+      expect(csrfSetCookie).toBeTruthy();
+      expect(csrfSetCookie).toContain('Path=/;');
+      expect(csrfSetCookie!.toLowerCase()).not.toContain('httponly');
+
+      const sessionSetCookie = cookies.find((c: string) => c.startsWith('__session='));
+      expect(sessionSetCookie).toBeTruthy();
+      expect(sessionSetCookie).toContain('Path=/api/admin');
+      expect(sessionSetCookie!.toLowerCase()).toContain('httponly');
+    });
+  });
+
   describe('allowlist rejection', () => {
     it('redirects to /admin?auth=forbidden for non-allowlisted user', async () => {
       const app = createApp({

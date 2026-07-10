@@ -105,7 +105,7 @@ export function createAdminRouter({ db, config }: AdminRouterDeps) {
   router.post('/logout', requireCsrf, (req, res) => {
     destroySession(db, req.adminSession!.id);
     res.clearCookie(SESSION_COOKIE_NAME, { path: '/api/admin' });
-    res.clearCookie(CSRF_COOKIE_NAME, { path: '/api/admin' });
+    res.clearCookie(CSRF_COOKIE_NAME, { path: '/' });
     res.status(204).end();
   });
 
