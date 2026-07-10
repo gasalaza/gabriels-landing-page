@@ -33,6 +33,9 @@ export function loadConfig() {
       .filter(Boolean),
     authRateLimitWindowMs: readPositiveInt('AUTH_RATE_LIMIT_WINDOW_MS', 900_000),
     authRateLimitMax: readPositiveInt('AUTH_RATE_LIMIT_MAX', 5),
+    resendApiKey: process.env.RESEND_API_KEY ?? '',
+    contactNotifyTo: process.env.CONTACT_NOTIFY_TO ?? '',
+    contactNotifyFrom: process.env.CONTACT_NOTIFY_FROM ?? 'onboarding@resend.dev',
   } as const;
 }
 

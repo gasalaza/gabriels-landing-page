@@ -30,8 +30,8 @@ function validate(form: FormData): FormErrors {
   if (!form.name.trim() || form.name.length > 100) e.name = 'Your name, please (max 100 chars).';
   if (!/^\S+@\S+\.\S+$/.test(form.email) || form.email.length > 200)
     e.email = "That email doesn't look right.";
-  if (form.msg.trim().length < 10 || form.msg.length > 5000)
-    e.msg = 'A bit more detail would help (10–5000 chars).';
+  if (form.msg.trim().length < 1 || form.msg.length > 20000)
+    e.msg = 'Add a note about your project (up to 20,000 characters).';
   return e;
 }
 
