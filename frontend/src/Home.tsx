@@ -1,4 +1,4 @@
-import { Nav, Hero, About, Stack, Services, Projects, Contact, Footer } from './sections';
+import { Nav, Hero, About, Stack, Services, Contact, Footer } from './sections';
 
 export function Home() {
   return (
@@ -9,7 +9,6 @@ export function Home() {
         <About />
         <Stack />
         <Services />
-        <Projects />
         <Contact />
       </main>
       <Footer />

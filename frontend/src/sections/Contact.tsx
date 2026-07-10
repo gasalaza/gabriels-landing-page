@@ -120,7 +120,7 @@ export function Contact() {
               </p>
 
               <div style={contactStyles.directs}>
-                <DirectRow icon="mail" label="Email" value={SITE.email} href={`mailto:${SITE.email}`} />
+                <DirectRow icon="mail" label="Email" value={SITE.email} href={`mailto:${SITE.email}`} target="_blank" rel="noopener noreferrer" />
                 <DirectRow icon="pin" label="Based in" value={SITE.location} />
               </div>
 
@@ -326,7 +326,7 @@ function Field({ label, name, value, onChange, error, focused, onFocus, onBlur, 
   );
 }
 
-function DirectRow({ icon, label, value, href }: { icon: 'mail' | 'phone' | 'pin'; label: string; value: string; href?: string }) {
+function DirectRow({ icon, label, value, href, target, rel }: { icon: 'mail' | 'phone' | 'pin'; label: string; value: string; href?: string; target?: string; rel?: string }) {
   const inner = (
     <>
       <div style={contactStyles.directIcon}>
@@ -339,7 +339,7 @@ function DirectRow({ icon, label, value, href }: { icon: 'mail' | 'phone' | 'pin
     </>
   );
   return href ? (
-    <a href={href} style={contactStyles.directRow}>{inner}</a>
+    <a href={href} style={contactStyles.directRow} target={target} rel={rel}>{inner}</a>
   ) : (
     <div style={contactStyles.directRow}>{inner}</div>
   );

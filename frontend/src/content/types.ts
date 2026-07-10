@@ -30,10 +30,3 @@ export interface Service {
   desc: string;
   points: string[];
 }
-
-export interface Project {
-  title: string;
-  role: string;
-  desc: string;
-  tags: string[];
-}
