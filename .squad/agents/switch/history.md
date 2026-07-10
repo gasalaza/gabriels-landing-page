@@ -8,4 +8,4 @@ Gabriel Salazar's personal portfolio / landing page: a public React + TypeScript
 
 ## Entries
 
-(none yet)
+- Phase 0 (2026-07-09T20:15:00-06:00): Styling/content work can start from the new portfolio skeleton with copied `gabriel.jpeg` and `Gabriel-Salazar-CV.pdf` assets.

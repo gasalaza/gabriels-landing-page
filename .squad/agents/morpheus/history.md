@@ -8,4 +8,4 @@ Gabriel Salazar's personal portfolio / landing page: a public React + TypeScript
 
 ## Entries
 
-(none yet)
+- Phase 0 (2026-07-09T20:15:00-06:00): Portfolio architecture baseline is set: React 19 + TypeScript + Vite, Express 5 + better-sqlite3, GitHub OAuth admin, Railway two-service deployment, and hardened CI/security guardrails.
