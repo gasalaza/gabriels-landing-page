@@ -164,5 +164,24 @@ export function createAdminRouter({ db, config }: AdminRouterDeps) {
     res.json({ ok: true });
   });
 
+  // DELETE /messages/:id
+  router.delete('/messages/:id', requireCsrf, (req, res) => {
+    const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const id = Number.parseInt(rawId ?? '', 10);
+    if (!Number.isFinite(id) || id < 1) {
+      res.status(400).json({ error: 'VALIDATION_ERROR', message: 'Invalid message id' });
+      return;
+    }
+
+    const result = db.prepare('DELETE FROM contact_submissions WHERE id = ?').run(id);
+
+    if (result.changes === 0) {
+      res.status(404).json({ error: 'NOT_FOUND' });
+      return;
+    }
+
+    res.status(204).end();
+  });
+
   return router;
 }

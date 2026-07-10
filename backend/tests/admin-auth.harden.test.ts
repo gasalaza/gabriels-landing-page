@@ -451,6 +451,68 @@ describe('admin auth', () => {
       expect(res.status).toBe(400);
     });
   });
+
+  describe('delete message', () => {
+    it('deletes an existing message and returns 204', async () => {
+      const app = createApp({ githubAuth: createMockGitHubAuth({}) });
+
+      await request(app).post('/api/contact').send({
+        name: 'Delete Me',
+        email: 'del@example.com',
+        projectType: 'other',
+        message: 'To be deleted',
+      });
+
+      const { cookieHeader, csrfToken } = await authenticateFullFlow(app);
+
+      const msgsRes = await request(app).get('/api/admin/messages').set('Cookie', cookieHeader);
+      const msgId = msgsRes.body.items[0].id;
+
+      const delRes = await request(app)
+        .delete(`/api/admin/messages/${msgId}`)
+        .set('Cookie', cookieHeader)
+        .set('X-CSRF-Token', csrfToken);
+
+      expect(delRes.status).toBe(204);
+
+      const afterRes = await request(app).get('/api/admin/messages').set('Cookie', cookieHeader);
+      expect(afterRes.body.total).toBe(0);
+    });
+
+    it('returns 404 for non-existent message id', async () => {
+      const app = createApp({ githubAuth: createMockGitHubAuth({}) });
+      const { cookieHeader, csrfToken } = await authenticateFullFlow(app);
+
+      const res = await request(app)
+        .delete('/api/admin/messages/99999')
+        .set('Cookie', cookieHeader)
+        .set('X-CSRF-Token', csrfToken);
+
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({ error: 'NOT_FOUND' });
+    });
+
+    it('returns 403 without CSRF token', async () => {
+      const app = createApp({ githubAuth: createMockGitHubAuth({}) });
+      const { cookieHeader } = await authenticateFullFlow(app);
+
+      const res = await request(app)
+        .delete('/api/admin/messages/1')
+        .set('Cookie', cookieHeader);
+
+      expect(res.status).toBe(403);
+      expect(res.body).toEqual({ error: 'CSRF' });
+    });
+
+    it('returns 401 without session', async () => {
+      const app = createApp({ githubAuth: createMockGitHubAuth({}) });
+
+      const res = await request(app).delete('/api/admin/messages/1');
+
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual({ error: 'UNAUTHENTICATED' });
+    });
+  });
 });
 
 describe('auth rate limiting', () => {

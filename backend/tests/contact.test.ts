@@ -165,13 +165,22 @@ describe('contact input-bounds validation', () => {
     expect(res.body.error).toBe('VALIDATION_ERROR');
   });
 
-  it('rejects empty message', async () => {
+  it('accepts empty message (defaults to empty string)', async () => {
     const res = await request(createApp())
       .post('/api/contact')
       .send({ ...validPayload(), message: '' });
 
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBe('VALIDATION_ERROR');
+    expect(res.status).toBe(201);
+  });
+
+  it('accepts omitted message (defaults to empty string)', async () => {
+    const { message: _message, ...noMessage } = validPayload();
+    const res = await request(createApp())
+      .post('/api/contact')
+      .send(noMessage);
+
+    expect(res.status).toBe(201);
+    expect(listSubmissions()[0]?.message).toBe('');
   });
 
   it('rejects invalid projectType', async () => {
