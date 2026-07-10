@@ -1,6 +1,7 @@
 import express from 'express';
 import { openDatabase } from './db/database.js';
 import { applySecurityHeaders } from './middleware/security-headers.js';
+import { createContactRouter } from './routes/contact.js';
 import { healthRouter } from './routes/health.js';
 
 export function createApp() {
@@ -14,6 +15,7 @@ export function createApp() {
 
   openDatabase().close();
 
+  app.use('/api', createContactRouter());
   app.use('/api', healthRouter);
 
   return app;
