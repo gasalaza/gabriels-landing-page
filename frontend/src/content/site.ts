@@ -50,19 +50,17 @@ export const SERVICES: Service[] = [
   {
     badge: '01',
     title: 'Landing pages & marketing sites',
-    price: 'from $1,800',
     desc: 'Next.js + Tailwind + shadcn. Fast, accessible, CMS-ready. Perfect for product launches and personal brands.',
     points: [
       'Next.js 15 + App Router',
       'Tailwind v4 design system',
       'Analytics + SEO',
-      '2-week delivery',
+      'Responsive + accessible',
     ],
   },
   {
     badge: '02',
     title: 'Full-stack web applications',
-    price: 'from $6,500',
     desc: 'React or Next.js front-end, .NET or Node backend, SQL or Cosmos DB. Auth, payments, admin — the lot.',
     points: [
       'TypeScript end-to-end',
@@ -73,10 +71,14 @@ export const SERVICES: Service[] = [
   },
   {
     badge: '03',
-    title: 'Cloud & backend consulting',
-    price: '$140 / hr',
-    desc: 'Azure architecture reviews, microservice design, CI/CD pipeline cleanup. Pragmatic recommendations you can ship this quarter.',
-    points: ['Architecture audits', 'Azure cost review', 'DevOps pipelines', 'Pairing sessions'],
+    title: 'Security reviews & secure development',
+    desc: 'Security assessments, vulnerability analysis, secure code review, and infrastructure hardening. Grounded in CompTIA Security+ and CySA+ — pragmatic recommendations you can ship this quarter.',
+    points: [
+      'Security & vulnerability assessments',
+      'Secure code review',
+      'Threat detection & hardening',
+      'Pentest skills in development — not yet a standalone service',
+    ],
   },
 ];
 

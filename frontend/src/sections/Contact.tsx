@@ -19,9 +19,9 @@ interface FormErrors {
 }
 
 const budgetOpts = [
-  { v: 'landing', l: 'Landing page', d: '~$1.8k' },
-  { v: 'fullstack', l: 'Full-stack app', d: '$6.5k+' },
-  { v: 'consult', l: 'Consulting', d: '$140/hr' },
+  { v: 'landing', l: 'Landing page', d: 'Marketing site' },
+  { v: 'fullstack', l: 'Full-stack app', d: 'Web app' },
+  { v: 'consult', l: 'Security', d: 'Security review' },
   { v: 'other', l: 'Other', d: "let's chat" },
 ];
 
@@ -122,6 +122,19 @@ export function Contact() {
               <div style={contactStyles.directs}>
                 <DirectRow icon="mail" label="Email" value={SITE.email} href={`mailto:${SITE.email}`} />
                 <DirectRow icon="pin" label="Based in" value={SITE.location} />
+              </div>
+
+              <div style={contactStyles.bookCall}>
+                <p style={contactStyles.bookCallText}>Prefer to talk? Grab a time.</p>
+                <a
+                  href="https://cal.com/gasalazacr/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                >
+                  Book a call
+                  <Icon name="arrowUpRight" size={14} />
+                </a>
               </div>
             </div>
           </Reveal>
@@ -382,6 +395,14 @@ const contactStyles = {
     borderRadius: 12,
     overflow: 'hidden',
     background: 'var(--bg-elevated)',
+  } as CSSProperties,
+  bookCall: {
+    marginTop: 24,
+  } as CSSProperties,
+  bookCallText: {
+    fontSize: 13,
+    color: 'var(--fg-muted)',
+    margin: '0 0 12px',
   } as CSSProperties,
   directRow: {
     display: 'flex',
