@@ -119,6 +119,20 @@
 - **LLM surface gate:** OWASP LLM Top 10 is N/A today because there is no AI surface; re-review is required before shipping any future LiteRT/on-device-AI demo, with scoped CSP and model output treated as untrusted.
 - **Single-admin-by-design:** DELETE/PATCH admin endpoints have no per-row ownership check because there is exactly one allowlisted admin (`gasalaza`); revisit if multi-admin is added.
 
+### 2026-07-10: LinkedIn-launch enhancement pipeline decisions
+
+**By:** Scribe, from Trinity/Neo/Tank/Rai launch pipeline
+
+**Context:** LinkedIn-launch enhancement pipeline shipped to `main` at 69a0a89 via PRs #41-#44.
+
+**Decisions:**
+- **Launch pipeline shipped:** PRs #41-#44 completed the SEO/Open Graph/a11y/perf pack, Built Secure section, RFC 9116 `security.txt`, Caddy serving rule, and `LAUNCH.md`.
+- **Public security posture language:** Public copy stays category-level only: no exact thresholds, limits, internal values, or absolute claims; use Rai-approved softened language.
+- **Disclosure contact:** `security.txt` uses `security@gasalaza.com` through Cloudflare Email Routing, user-confirmed.
+- **Cloudflare Web Analytics deferred:** Only pre-approved CSP additions are `static.cloudflareinsights.com` in `script-src` and `cloudflareinsights.com` in `connect-src`, documented in `LAUNCH.md`.
+- **PII discipline:** Never commit personal email addresses into the public repo.
+- **Strict merge ordering:** With two open PRs, the second PR needs `gh pr update-branch` because main requires strict up-to-date protection.
+
 ## Governance
 - All meaningful changes require team consensus
 - Document architectural decisions here
