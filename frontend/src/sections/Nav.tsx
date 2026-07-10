@@ -5,7 +5,6 @@ const links: [string, string][] = [
   ['About', '#about'],
   ['Stack', '#stack'],
   ['Services', '#services'],
-  ['Projects', '#projects'],
 ];
 
 const navStyles = {
@@ -84,8 +83,8 @@ export function Nav() {
             <span style={{ color: 'var(--accent)' }}>G</span>S
           </span>
           <span style={navStyles.logoLabel}>
-            <span style={{ color: 'var(--fg)' }}>gabriel</span>
-            <span style={{ color: 'var(--fg-dim)' }}>.dev</span>
+            <span style={{ color: 'var(--fg)' }}>gasalaza</span>
+            <span style={{ color: 'var(--fg-dim)' }}>.com</span>
           </span>
         </a>
         <div style={navStyles.links}>

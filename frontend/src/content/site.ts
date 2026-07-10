@@ -1,4 +1,4 @@
-import type { SiteInfo, Skills, StackGroup, Service, Project } from './types';
+import type { SiteInfo, Skills, StackGroup, Service } from './types';
 
 export const SITE: SiteInfo = {
   name: 'Gabriel Salazar',
@@ -82,23 +82,3 @@ export const SERVICES: Service[] = [
   },
 ];
 
-export const PROJECTS: Project[] = [
-  {
-    title: 'Cloud billing engine',
-    role: 'Lead engineer',
-    desc: 'High-throughput microservices pipeline running on Azure Service Fabric — processes millions of usage records per hour.',
-    tags: ['C#', '.NET 6', 'Service Fabric', 'Cosmos DB'],
-  },
-  {
-    title: 'Internal onboarding portal',
-    role: 'Side project',
-    desc: 'Next.js + Tailwind + shadcn — onboarding flow for new engineers, mentor matching and progress tracking.',
-    tags: ['Next.js', 'TypeScript', 'Tailwind', 'Postgres'],
-  },
-  {
-    title: 'Exchange automation toolkit',
-    role: 'Support Engineering',
-    desc: 'PowerShell modules that automated repetitive Exchange admin tasks, freeing hundreds of hours per year.',
-    tags: ['PowerShell', 'Exchange', 'M365'],
-  },
-];

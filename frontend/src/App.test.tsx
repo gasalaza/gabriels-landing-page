@@ -9,7 +9,6 @@ describe('App', () => {
     expect(screen.getAllByText(/gabriel salazar/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/tools i reach for/i)).toBeInTheDocument();
     expect(screen.getByText(/three ways we can work together/i)).toBeInTheDocument();
-    expect(screen.getByText(/a few things i've built/i)).toBeInTheDocument();
     expect(screen.getByText(/let's build/i)).toBeInTheDocument();
   });
 

@@ -52,18 +52,15 @@ export function Footer() {
           </div>
           <div>
             <div style={footerStyles.name}>{SITE.name}</div>
-            <div style={footerStyles.meta}>© 2026 · Built with React + Vite</div>
+            <div style={footerStyles.meta}>© 2026</div>
           </div>
         </div>
         <div style={footerStyles.r}>
-          <a href={`mailto:${SITE.email}`} style={footerStyles.link}>
+          <a href={`mailto:${SITE.email}`} style={footerStyles.link} target="_blank" rel="noopener noreferrer">
             <Icon name="mail" size={14} /> email
           </a>
-          <a href="#" style={footerStyles.link} aria-label="LinkedIn profile">
+          <a href="https://www.linkedin.com/in/gasalazacr/" style={footerStyles.link} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">
             <Icon name="linkedin" size={14} /> linkedin
-          </a>
-          <a href="#" style={footerStyles.link} aria-label="GitHub profile">
-            <Icon name="github" size={14} /> github
           </a>
         </div>
       </div>
