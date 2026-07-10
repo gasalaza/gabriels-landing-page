@@ -30,3 +30,18 @@ export interface Service {
   desc: string;
   points: string[];
 }
+
+export interface SecurityBullet {
+  lead: string;
+  text: string;
+}
+
+export interface SecurityPosture {
+  intro: string;
+  bullets: SecurityBullet[];
+  linkLine: string;
+  linkText: string;
+  linkHref: string;
+  chips: string[];
+  disclosure: string;
+}

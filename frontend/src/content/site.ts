@@ -1,4 +1,4 @@
-import type { SiteInfo, Skills, StackGroup, Service } from './types';
+import type { SiteInfo, Skills, StackGroup, Service, SecurityPosture } from './types';
 
 export const SITE: SiteInfo = {
   name: 'Gabriel Salazar',
@@ -81,4 +81,41 @@ export const SERVICES: Service[] = [
     ],
   },
 ];
+
+export const SECURITY_POSTURE: SecurityPosture = {
+  intro:
+    "This site isn\u2019t just a portfolio \u2014 it\u2019s a production application built with the same security discipline I bring to every project. Designed with OWASP Top 10 risks in mind, validated by external scanners, and open to responsible disclosure.",
+  bullets: [
+    {
+      lead: 'Input validation & parameterized queries',
+      text: 'all user input is schema-validated at the boundary; every database query is parameterized.',
+    },
+    {
+      lead: 'Security headers',
+      text: 'Content Security Policy, HSTS, X-Frame-Options DENY, X-Content-Type-Options, and Referrer-Policy set by default on application responses.',
+    },
+    {
+      lead: 'Authentication & session integrity',
+      text: 'admin access via OAuth with PKCE, HMAC-signed sessions, and CSRF double-submit protection.',
+    },
+    {
+      lead: 'Rate limiting & abuse prevention',
+      text: 'public endpoints are rate-limited per real client IP with origin verification and daily send caps to prevent resource exhaustion.',
+    },
+    {
+      lead: 'Dependency hygiene',
+      text: 'dependency scans are clean at deploy time, with pinned versions and no wildcard ranges.',
+    },
+    {
+      lead: 'Defense in depth',
+      text: 'generic error responses in production, structured security-event logging, and server-level timeout hardening.',
+    },
+  ],
+  linkLine: 'Found a vulnerability? I take reports seriously \u2014 see my ',
+  linkText: 'security.txt',
+  linkHref: '/.well-known/security.txt',
+  chips: ['Security+', 'CySA+', '\u{1F1E8}\u{1F1F7}'],
+  disclosure:
+    'I welcome good-faith vulnerability reports. Please reach out using the contact information in my security.txt with a description of the issue and steps to reproduce. I\u2019ll acknowledge your report within 3 business days. Thank you for helping keep this site safe.',
+};
 
