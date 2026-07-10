@@ -84,15 +84,15 @@ export const SERVICES: Service[] = [
 
 export const SECURITY_POSTURE: SecurityPosture = {
   intro:
-    "This site isn\u2019t just a portfolio \u2014 it\u2019s a production application built with the same security discipline I bring to every project. Hardened against the OWASP Top 10, validated by external scanners, and open to responsible disclosure.",
+    "This site isn\u2019t just a portfolio \u2014 it\u2019s a production application built with the same security discipline I bring to every project. Designed with OWASP Top 10 risks in mind, validated by external scanners, and open to responsible disclosure.",
   bullets: [
     {
       lead: 'Input validation & parameterized queries',
-      text: 'all user input is schema-validated at the boundary; every database query is parameterized. No exceptions.',
+      text: 'all user input is schema-validated at the boundary; every database query is parameterized.',
     },
     {
       lead: 'Security headers',
-      text: 'Content Security Policy, HSTS, X-Frame-Options DENY, X-Content-Type-Options, and Referrer-Policy enforced on every response.',
+      text: 'Content Security Policy, HSTS, X-Frame-Options DENY, X-Content-Type-Options, and Referrer-Policy set by default on application responses.',
     },
     {
       lead: 'Authentication & session integrity',
@@ -104,7 +104,7 @@ export const SECURITY_POSTURE: SecurityPosture = {
     },
     {
       lead: 'Dependency hygiene',
-      text: 'zero known vulnerabilities at deploy, with pinned versions and no wildcard ranges.',
+      text: 'dependency scans are clean at deploy time, with pinned versions and no wildcard ranges.',
     },
     {
       lead: 'Defense in depth',
