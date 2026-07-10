@@ -16,6 +16,8 @@ CREATE INDEX IF NOT EXISTS idx_submissions_read
 
 CREATE TABLE IF NOT EXISTS admin_sessions (
   id            TEXT    PRIMARY KEY,
+  login         TEXT    NOT NULL,
+  csrf_hash     TEXT    NOT NULL,
   created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
   expires_at    TEXT    NOT NULL,
   ip            TEXT,
