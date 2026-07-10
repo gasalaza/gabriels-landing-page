@@ -21,7 +21,7 @@ describe('Contact section', () => {
 
     expect(await screen.findByText(/your name, please/i)).toBeInTheDocument();
     expect(screen.getByText(/that email doesn't look right/i)).toBeInTheDocument();
-    expect(screen.getByText(/a bit more detail/i)).toBeInTheDocument();
+    expect(screen.getByText(/add a note about your project/i)).toBeInTheDocument();
   });
 
   it('submits successfully with correct payload', async () => {

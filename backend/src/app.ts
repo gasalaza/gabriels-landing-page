@@ -22,8 +22,8 @@ export function createApp(options: CreateAppOptions = {}) {
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use(applySecurityHeaders());
-  app.use(express.json({ limit: '16kb' }));
-  app.use(express.urlencoded({ extended: false, limit: '16kb' }));
+  app.use(express.json({ limit: '50kb' }));
+  app.use(express.urlencoded({ extended: false, limit: '50kb' }));
   app.use(cookieParser());
 
   const db = openDatabase();

@@ -111,7 +111,26 @@ docker compose down -v
 
 ---
 
-## 8. Secret Hygiene
+## 8. Contact Email Notifications (Resend)
+
+The backend optionally emails you when someone submits the contact form, using [Resend](https://resend.com) (free tier: 3,000 emails/month, 100/day).
+
+1. Create a free Resend account at https://resend.com.
+2. Create an API key in the Resend dashboard.
+3. Set these env vars on the **backend** Railway service:
+
+| Variable | Value |
+|----------|-------|
+| `RESEND_API_KEY` | *(from step 2)* |
+| `CONTACT_NOTIFY_TO` | *(your inbox, e.g. gabriel@example.com)* |
+| `CONTACT_NOTIFY_FROM` | `onboarding@resend.dev` |
+
+4. **`onboarding@resend.dev`** works immediately but can only send to your own Resend-verified email. After `gasalaza.com` DNS is live, verify the domain in Resend and switch `CONTACT_NOTIFY_FROM` to `noreply@gasalaza.com` (or similar).
+5. If any of the three vars are empty/missing, email silently no-ops — the contact form still works and persists to the DB.
+
+---
+
+## 9. Secret Hygiene
 
 - **Never** commit `.env` to the repo (it's in `.gitignore`).
 - `SESSION_SECRET` lives only in Railway env vars — rotate immediately if leaked.
