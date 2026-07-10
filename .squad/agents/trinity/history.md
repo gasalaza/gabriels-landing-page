@@ -8,4 +8,4 @@ Gabriel Salazar's personal portfolio / landing page: a public React + TypeScript
 
 ## Entries
 
-(none yet)
+- Phase 0 (2026-07-09T20:15:00-06:00): Security baseline is locked with branch protection, secret scanning/push protection, Dependabot security automation, security headers, and hardening tests.

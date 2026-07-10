@@ -8,4 +8,4 @@ Gabriel Salazar's personal portfolio / landing page: a public React + TypeScript
 
 ## Entries
 
-(none yet)
+- Phase 0 (2026-07-09T20:15:00-06:00): Frontend walking skeleton is in place with Vite React TypeScript rendering Gabriel Salazar’s site name and a passing RTL test.

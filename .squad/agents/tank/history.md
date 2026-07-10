@@ -8,4 +8,4 @@ Gabriel Salazar's personal portfolio / landing page: a public React + TypeScript
 
 ## Entries
 
-(none yet)
+- Phase 0 (2026-07-09T20:15:00-06:00): Scaffolded the green walking skeleton: npm workspaces, Express 5/better-sqlite3 backend, Vite React TypeScript frontend, CI, Railway/Caddy deployment files, hooks, docs, and assets; typecheck, lint, test, and build all passed.
