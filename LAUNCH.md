@@ -24,7 +24,7 @@ Do these **before** sharing the URL publicly.
 
 - [ ] **Set up Cloudflare Email Routing for `security@gasalaza.com`** — the site ships a `/.well-known/security.txt` listing this address as the security contact. Without a routing rule, disclosure emails bounce.
   1. Cloudflare dashboard → Email → Email Routing → Routing rules.
-  2. Add a rule: `security@gasalaza.com` → forward to `gabrielsalazar3092@gmail.com`.
+  2. Add a rule: `security@gasalaza.com` → forward to your personal inbox (the Gmail you check daily).
   3. Takes ~2 minutes. Free on all Cloudflare plans.
 
 ### Railway configuration
