@@ -299,6 +299,35 @@ textarea::placeholder {
   color: var(--fg-dim);
 }
 
+/* ——— Accessibility ——— */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .reveal.in {
+    transition: none;
+  }
+  .dot.pulse,
+  .chip .dot.pulse {
+    animation: none;
+  }
+  .btn-primary::after {
+    transition: none;
+    transform: none;
+  }
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* Responsive hero grid */
 @media (max-width: 860px) {
   .wrap > div[style*="grid-template-columns"] {
