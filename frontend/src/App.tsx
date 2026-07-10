@@ -1,20 +1,17 @@
 import './styles/global.css';
-import { Nav, Hero, About, Stack, Services, Projects, Contact, Footer } from './sections';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Home } from './Home';
+import { AdminPage } from './admin/AdminPage';
 
 export function App() {
   return (
-    <>
-      <Nav />
-      <main>
-        <Hero />
-        <About />
-        <Stack />
-        <Services />
-        <Projects />
-        <Contact />
-      </main>
-      <Footer />
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
