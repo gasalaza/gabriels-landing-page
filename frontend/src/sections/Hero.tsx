@@ -86,7 +86,7 @@ export function Hero() {
               <div style={heroStyles.photoOverlay} />
               <div style={heroStyles.photoTag}>
                 <span className="dot pulse" style={{ width: 6, height: 6, display: 'inline-block' }} />
-                <span>online · costa rica (GMT-6)</span>
+                <span>online · Costa Rica (GMT-6)</span>
               </div>
               <div style={heroStyles.photoMeta}>
                 <div>
