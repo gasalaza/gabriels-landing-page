@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, type CSSProperties } from 'react';
-import { getMessages, markRead, logout } from './api';
+import { getMessages, markRead, logout, deleteMessage } from './api';
 import type { Message } from './api';
 
 interface DashboardProps {
@@ -12,6 +12,7 @@ export function Dashboard({ login, onLogout }: DashboardProps) {
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<Message | null>(null);
   const limit = 20;
 
   const fetchMessages = useCallback(async (currentOffset: number) => {
@@ -37,8 +38,20 @@ export function Dashboard({ login, onLogout }: DashboardProps) {
       setItems((prev) =>
         prev.map((m) => (m.id === id ? { ...m, read: !currentRead } : m)),
       );
+      setSelected((prev) => (prev?.id === id ? { ...prev, read: !currentRead } : prev));
     } catch {
-      // optimistic rollback not needed — re-fetch
+      void fetchMessages(offset);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Delete this message? This cannot be undone.')) return;
+    try {
+      await deleteMessage(id);
+      setItems((prev) => prev.filter((m) => m.id !== id));
+      setTotal((prev) => prev - 1);
+      if (selected?.id === id) setSelected(null);
+    } catch {
       void fetchMessages(offset);
     }
   };
@@ -84,7 +97,15 @@ export function Dashboard({ login, onLogout }: DashboardProps) {
               <span style={styles.cellAction}>Read</span>
             </div>
             {items.map((m) => (
-              <div key={m.id} style={{ ...styles.row, opacity: m.read ? 0.6 : 1 }}>
+              <div
+                key={m.id}
+                style={{ ...styles.row, opacity: m.read ? 0.6 : 1, cursor: 'pointer' }}
+                onClick={() => setSelected(m)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelected(m); }}
+                aria-label={`View message from ${m.name}`}
+              >
                 <span style={styles.cellName}>{m.name}</span>
                 <span style={styles.cellEmail}>{m.email}</span>
                 <span style={styles.cellType}>{m.projectType}</span>
@@ -95,7 +116,7 @@ export function Dashboard({ login, onLogout }: DashboardProps) {
                 <span style={styles.cellAction}>
                   <button
                     type="button"
-                    onClick={() => void handleMarkRead(m.id, m.read)}
+                    onClick={(e) => { e.stopPropagation(); void handleMarkRead(m.id, m.read); }}
                     style={styles.toggleBtn}
                     aria-label={m.read ? `Mark unread ${m.name}` : `Mark read ${m.name}`}
                   >
@@ -129,6 +150,103 @@ export function Dashboard({ login, onLogout }: DashboardProps) {
           </div>
         </>
       )}
+
+      {selected && (
+        <MessageDetail
+          message={selected}
+          onClose={() => setSelected(null)}
+          onMarkRead={(read) => void handleMarkRead(selected.id, !read)}
+          onDelete={() => void handleDelete(selected.id)}
+        />
+      )}
+    </div>
+  );
+}
+
+interface MessageDetailProps {
+  message: Message;
+  onClose: () => void;
+  onMarkRead: (read: boolean) => void;
+  onDelete: () => void;
+}
+
+function MessageDetail({ message, onClose, onMarkRead, onDelete }: MessageDetailProps) {
+  const replySubject = encodeURIComponent('Re: your project inquiry');
+  const mailtoHref = `mailto:${message.email}?subject=${replySubject}`;
+
+  return (
+    <div style={styles.overlay} onClick={onClose} role="dialog" aria-label="Message detail">
+      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.panelHeader}>
+          <h2 style={styles.panelTitle}>Message</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            style={styles.closeBtn}
+            aria-label="Close detail"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div style={styles.panelBody}>
+          <div style={styles.fieldRow}>
+            <span style={styles.fieldLabel}>From</span>
+            <span style={styles.fieldValue}>{message.name}</span>
+          </div>
+          <div style={styles.fieldRow}>
+            <span style={styles.fieldLabel}>Email</span>
+            <span style={styles.fieldValue}>{message.email}</span>
+          </div>
+          <div style={styles.fieldRow}>
+            <span style={styles.fieldLabel}>Type</span>
+            <span style={styles.fieldValue}>{message.projectType}</span>
+          </div>
+          <div style={styles.fieldRow}>
+            <span style={styles.fieldLabel}>Date</span>
+            <span style={styles.fieldValue}>
+              {new Date(message.createdAt).toLocaleString()}
+            </span>
+          </div>
+          <div style={styles.fieldRow}>
+            <span style={styles.fieldLabel}>Status</span>
+            <span style={styles.fieldValue}>{message.read ? 'Read' : 'Unread'}</span>
+          </div>
+
+          <div style={styles.messageBlock}>
+            <span style={styles.fieldLabel}>Message</span>
+            <div style={styles.messageContent}>
+              {message.message || '(no message)'}
+            </div>
+          </div>
+        </div>
+
+        <div style={styles.panelActions}>
+          <a
+            href={mailtoHref}
+            className="btn btn-primary"
+            style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            Reply
+          </a>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => onMarkRead(message.read)}
+          >
+            {message.read ? 'Mark unread' : 'Mark read'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={onDelete}
+            style={{ color: 'oklch(0.72 0.18 25)' }}
+            aria-label="Delete message"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -222,5 +340,101 @@ const styles = {
     fontFamily: 'var(--font-mono)',
     fontSize: 12,
     color: 'var(--fg-dim)',
+  } as CSSProperties,
+  overlay: {
+    position: 'fixed',
+    inset: 0,
+    zIndex: 100,
+    background: 'oklch(0 0 0 / 0.6)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  } as CSSProperties,
+  panel: {
+    background: 'var(--bg-elevated)',
+    border: '1px solid var(--border)',
+    borderRadius: 14,
+    width: '100%',
+    maxWidth: 560,
+    maxHeight: '80vh',
+    display: 'flex',
+    flexDirection: 'column',
+    boxShadow: '0 24px 48px -20px oklch(0 0 0 / 0.5)',
+  } as CSSProperties,
+  panelHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '16px 20px',
+    borderBottom: '1px solid var(--border)',
+  } as CSSProperties,
+  panelTitle: {
+    fontSize: 18,
+    fontWeight: 600,
+    letterSpacing: '-0.02em',
+    margin: 0,
+  } as CSSProperties,
+  closeBtn: {
+    background: 'none',
+    border: '1px solid var(--border)',
+    borderRadius: 6,
+    width: 32,
+    height: 32,
+    cursor: 'pointer',
+    color: 'var(--fg-muted)',
+    fontSize: 14,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  } as CSSProperties,
+  panelBody: {
+    padding: 20,
+    overflowY: 'auto',
+    flex: 1,
+  } as CSSProperties,
+  fieldRow: {
+    display: 'flex',
+    gap: 12,
+    padding: '8px 0',
+    borderBottom: '1px solid var(--border)',
+    fontSize: 13,
+    alignItems: 'baseline',
+  } as CSSProperties,
+  fieldLabel: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: 10,
+    color: 'var(--fg-dim)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.08em',
+    minWidth: 60,
+    flexShrink: 0,
+  } as CSSProperties,
+  fieldValue: {
+    color: 'var(--fg)',
+    wordBreak: 'break-word',
+  } as CSSProperties,
+  messageBlock: {
+    marginTop: 12,
+  } as CSSProperties,
+  messageContent: {
+    marginTop: 8,
+    padding: 14,
+    background: 'var(--bg)',
+    border: '1px solid var(--border)',
+    borderRadius: 8,
+    fontSize: 14,
+    lineHeight: 1.6,
+    color: 'var(--fg)',
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+    maxHeight: 260,
+    overflowY: 'auto',
+  } as CSSProperties,
+  panelActions: {
+    display: 'flex',
+    gap: 8,
+    padding: '16px 20px',
+    borderTop: '1px solid var(--border)',
   } as CSSProperties,
 };

@@ -73,3 +73,17 @@ export async function logout(): Promise<void> {
     },
   });
 }
+
+export async function deleteMessage(id: string): Promise<void> {
+  const res = await fetch(`/api/admin/messages/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'X-CSRF-Token': readCsrfToken(),
+    },
+  });
+  if (!res.ok) {
+    const err = (await res.json()) as ApiError;
+    throw new Error(err.error || 'UNKNOWN');
+  }
+}
