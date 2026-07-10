@@ -20,13 +20,50 @@ export function createApp(options: CreateAppOptions = {}) {
   const app = express();
 
   app.disable('x-powered-by');
-  app.set('trust proxy', 1);
+  app.set('trust proxy', config.trustProxy);
   app.use(applySecurityHeaders());
-  app.use(express.json({ limit: '50kb' }));
-  app.use(express.urlencoded({ extended: false, limit: '50kb' }));
+  app.use(express.json({ limit: '25kb' }));
+  app.use(express.urlencoded({ extended: false, limit: '25kb' }));
   app.use(cookieParser());
 
+  // CORS — manual implementation (no cors package). Reflect allowed origins only;
+  // disallowed origins simply get no CORS headers (browser blocks the request).
+  const allowedOrigins = new Set([config.publicBaseUrl]);
+  if (config.nodeEnv !== 'production') {
+    allowedOrigins.add('http://localhost:5173');
+  }
+
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const origin = req.get('origin');
+    if (origin && allowedOrigins.has(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-CSRF-Token');
+    }
+    if (req.method === 'OPTIONS') {
+      res.status(204).end();
+      return;
+    }
+    next();
+  });
+
   const db = openDatabase();
+
+  // Expired session cleanup — run once on startup to prevent unbounded growth
+  db.prepare("DELETE FROM admin_sessions WHERE datetime(expires_at) < datetime('now')").run();
+
+  // Origin guard on POST /api/contact — defense-in-depth CSRF/abuse protection.
+  // If Origin is present and NOT in the allowlist → 403. Absent Origin (non-browser) falls through.
+  app.post('/api/contact', (req: Request, res: Response, next: NextFunction) => {
+    const origin = req.get('origin');
+    if (origin && !allowedOrigins.has(origin)) {
+      res.status(403).json({ error: 'FORBIDDEN' });
+      return;
+    }
+    next();
+  });
 
   // Public routes
   app.use('/api', createContactRouter());

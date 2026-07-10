@@ -33,9 +33,11 @@ export function loadConfig() {
       .filter(Boolean),
     authRateLimitWindowMs: readPositiveInt('AUTH_RATE_LIMIT_WINDOW_MS', 900_000),
     authRateLimitMax: readPositiveInt('AUTH_RATE_LIMIT_MAX', 5),
+    trustProxy: process.env.TRUST_PROXY ?? '1',
     resendApiKey: process.env.RESEND_API_KEY ?? '',
     contactNotifyTo: process.env.CONTACT_NOTIFY_TO ?? '',
     contactNotifyFrom: process.env.CONTACT_NOTIFY_FROM ?? 'onboarding@resend.dev',
+    contactEmailDailyCap: readPositiveInt('CONTACT_EMAIL_DAILY_CAP', 50),
   } as const;
 }
 
