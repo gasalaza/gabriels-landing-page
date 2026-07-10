@@ -9,6 +9,8 @@ import type Database from 'better-sqlite3';
 import type { AppConfig } from '../config.js';
 import {
   createSession,
+  hmacSign,
+  hmacVerify,
   SESSION_COOKIE_NAME,
   CSRF_COOKIE_NAME,
   SESSION_COOKIE_MAX_AGE,
@@ -44,7 +46,8 @@ export function createAdminAuthRouter({ db, config, githubAuth }: AdminAuthRoute
     const codeVerifier = base64url(randomBytes(32));
     const codeChallenge = sha256Base64url(codeVerifier);
 
-    const paCookieValue = JSON.stringify({ state, codeVerifier });
+    const paCookiePayload = JSON.stringify({ state, codeVerifier });
+    const paCookieValue = `${paCookiePayload}.${hmacSign(paCookiePayload, config.sessionSecret)}`;
 
     const cookieOpts: CookieOptions = {
       httpOnly: true,
@@ -87,7 +90,20 @@ export function createAdminAuthRouter({ db, config, githubAuth }: AdminAuthRoute
 
     let paData: { state: string; codeVerifier: string };
     try {
-      paData = JSON.parse(paCookieRaw) as { state: string; codeVerifier: string };
+      const lastDot = paCookieRaw.lastIndexOf('.');
+      if (lastDot === -1) {
+        res.redirect(adminRedirect('?auth=error'));
+        return;
+      }
+      const payload = paCookieRaw.slice(0, lastDot);
+      const signature = paCookieRaw.slice(lastDot + 1);
+
+      if (!hmacVerify(payload, signature, config.sessionSecret)) {
+        res.redirect(adminRedirect('?auth=error'));
+        return;
+      }
+
+      paData = JSON.parse(payload) as { state: string; codeVerifier: string };
     } catch {
       res.redirect(adminRedirect('?auth=error'));
       return;
