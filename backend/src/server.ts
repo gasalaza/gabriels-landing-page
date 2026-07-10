@@ -14,6 +14,12 @@ if (existsSync(envFilePath)) {
 const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const app = createApp();
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Backend listening on port ${port}`);
 });
+
+// Server timeouts — prevent slowloris/DDoS. keepAliveTimeout must exceed
+// Cloudflare's 60s idle timeout so CF doesn't hit a closed socket.
+server.keepAliveTimeout = 65_000;
+server.headersTimeout = 70_000;
+server.requestTimeout = 30_000;

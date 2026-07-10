@@ -17,6 +17,7 @@ import {
 } from '../auth/session.js';
 import { exchangeCodeForToken, fetchGitHubUser } from '../auth/github.js';
 import type { GitHubAuthDeps } from '../auth/github.js';
+import { getClientIp } from '../middleware/client-ip.js';
 
 const PA_COOKIE_NAME = '__pa';
 const PA_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
@@ -138,6 +139,7 @@ export function createAdminAuthRouter({ db, config, githubAuth }: AdminAuthRoute
 
     // Check allowlist
     if (!config.authAllowlist.includes(user.login.toLowerCase())) {
+      console.warn(JSON.stringify({ event: 'oauth_allowlist_rejected', login: user.login, ip: getClientIp(req) }));
       res.redirect(adminRedirect('?auth=forbidden'));
       return;
     }

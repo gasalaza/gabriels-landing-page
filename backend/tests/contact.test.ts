@@ -263,6 +263,7 @@ describe('contact email notification', () => {
     delete process.env.RESEND_API_KEY;
     delete process.env.CONTACT_NOTIFY_TO;
     delete process.env.CONTACT_NOTIFY_FROM;
+    delete process.env.CONTACT_EMAIL_DAILY_CAP;
   });
 
   it('sends email via Resend when configured, and still returns 201', async () => {
@@ -320,5 +321,125 @@ describe('contact email notification', () => {
 
     expect(res.status).toBe(201);
     expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('skips email when daily cap is exceeded', async () => {
+    process.env.RESEND_API_KEY = 'test-resend-key';
+    process.env.CONTACT_NOTIFY_TO = 'gabriel@example.com';
+    process.env.CONTACT_EMAIL_DAILY_CAP = '2';
+
+    const mockFetch = vi.fn(async () => new Response(JSON.stringify({ id: 'ok' }), { status: 200 }));
+    vi.stubGlobal('fetch', mockFetch);
+
+    const app = createApp();
+
+    // First two submissions: email sent
+    await request(app).post('/api/contact').send(validPayload());
+    await request(app).post('/api/contact').send({ ...validPayload(), email: 'b@example.com' });
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+
+    // Third submission: cap exceeded, email skipped but still 201
+    const res = await request(app).post('/api/contact').send({ ...validPayload(), email: 'c@example.com' });
+    expect(res.status).toBe(201);
+    expect(listSubmissions()).toHaveLength(3);
+    expect(mockFetch).toHaveBeenCalledTimes(2); // no additional call
+  });
+});
+
+describe('CORS and origin guard', () => {
+  beforeEach(() => {
+    process.env.SQLITE_DATABASE_PATH = testDatabasePath;
+    process.env.CONTACT_RATE_LIMIT_WINDOW_MS = '60000';
+    process.env.CONTACT_RATE_LIMIT_MAX = '100';
+    process.env.PUBLIC_BASE_URL = 'http://localhost:5173';
+    resetDatabase();
+  });
+
+  afterEach(() => {
+    resetDatabase();
+    delete process.env.SQLITE_DATABASE_PATH;
+    delete process.env.CONTACT_RATE_LIMIT_WINDOW_MS;
+    delete process.env.CONTACT_RATE_LIMIT_MAX;
+    delete process.env.PUBLIC_BASE_URL;
+  });
+
+  it('returns 403 for POST /api/contact with a foreign Origin', async () => {
+    const res = await request(createApp())
+      .post('/api/contact')
+      .set('Origin', 'https://evil.example.com')
+      .send(validPayload());
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ error: 'FORBIDDEN' });
+  });
+
+  it('allows POST /api/contact with the configured Origin', async () => {
+    const res = await request(createApp())
+      .post('/api/contact')
+      .set('Origin', 'http://localhost:5173')
+      .send(validPayload());
+
+    expect(res.status).toBe(201);
+  });
+
+  it('allows POST /api/contact with no Origin header', async () => {
+    const res = await request(createApp())
+      .post('/api/contact')
+      .send(validPayload());
+
+    expect(res.status).toBe(201);
+  });
+
+  it('responds 204 to OPTIONS preflight from allowed origin with ACAO', async () => {
+    const res = await request(createApp())
+      .options('/api/contact')
+      .set('Origin', 'http://localhost:5173');
+
+    expect(res.status).toBe(204);
+    expect(res.headers['access-control-allow-origin']).toBe('http://localhost:5173');
+    expect(res.headers['access-control-allow-credentials']).toBe('true');
+    expect(res.headers['access-control-allow-headers']).toContain('X-CSRF-Token');
+  });
+
+  it('omits ACAO header for OPTIONS from disallowed origin', async () => {
+    const res = await request(createApp())
+      .options('/api/contact')
+      .set('Origin', 'https://evil.example.com');
+
+    expect(res.status).toBe(204);
+    expect(res.headers['access-control-allow-origin']).toBeUndefined();
+  });
+});
+
+describe('client IP key generator', () => {
+  beforeEach(() => {
+    process.env.SQLITE_DATABASE_PATH = testDatabasePath;
+    process.env.CONTACT_RATE_LIMIT_WINDOW_MS = '60000';
+    process.env.CONTACT_RATE_LIMIT_MAX = '100';
+    resetDatabase();
+  });
+
+  afterEach(() => {
+    resetDatabase();
+    delete process.env.SQLITE_DATABASE_PATH;
+    delete process.env.CONTACT_RATE_LIMIT_WINDOW_MS;
+    delete process.env.CONTACT_RATE_LIMIT_MAX;
+  });
+
+  it('uses cf-connecting-ip for rate limit bucketing when present', async () => {
+    process.env.CONTACT_RATE_LIMIT_MAX = '2';
+    const app = createApp();
+
+    // Two requests from IP-A via cf-connecting-ip
+    await request(app).post('/api/contact').set('cf-connecting-ip', '1.2.3.4').send(validPayload());
+    await request(app).post('/api/contact').set('cf-connecting-ip', '1.2.3.4').send({ ...validPayload(), email: 'b@example.com' });
+
+    // Third from same cf-connecting-ip → rate limited
+    const limited = await request(app).post('/api/contact').set('cf-connecting-ip', '1.2.3.4').send({ ...validPayload(), email: 'c@example.com' });
+    expect(limited.status).toBe(429);
+
+    // But a different cf-connecting-ip is NOT rate limited
+    const other = await request(app).post('/api/contact').set('cf-connecting-ip', '5.6.7.8').send({ ...validPayload(), email: 'd@example.com' });
+    expect(other.status).toBe(201);
   });
 });

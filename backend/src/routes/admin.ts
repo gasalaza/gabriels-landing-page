@@ -16,6 +16,7 @@ import {
   CSRF_COOKIE_NAME,
   type SessionRow,
 } from '../auth/session.js';
+import { getClientIp } from '../middleware/client-ip.js';
 
 // Extend Express Request to carry session data
 declare global {
@@ -72,6 +73,7 @@ export function createAdminRouter({ db, config }: AdminRouterDeps) {
 
     const session = validateSession(db, cookieValue, config.sessionSecret);
     if (!session) {
+      console.warn(JSON.stringify({ event: 'admin_session_invalid', ip: getClientIp(req) }));
       res.status(401).json({ error: 'UNAUTHENTICATED' });
       return;
     }
@@ -86,6 +88,7 @@ export function createAdminRouter({ db, config }: AdminRouterDeps) {
     const csrfCookie = req.cookies?.[CSRF_COOKIE_NAME] ?? '';
 
     if (!req.adminSession || !validateCsrf(req.adminSession, csrfHeader, csrfCookie)) {
+      console.warn(JSON.stringify({ event: 'csrf_failure', ip: getClientIp(req) }));
       res.status(403).json({ error: 'CSRF' });
       return;
     }

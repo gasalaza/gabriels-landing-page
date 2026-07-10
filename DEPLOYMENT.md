@@ -30,12 +30,14 @@ Create a new Railway project from this repo. Add **two services**:
 |----------|-------|
 | `NODE_ENV` | `production` |
 | `PORT` | `3000` |
-| `PUBLIC_BASE_URL` | `https://<your-domain>` |
+| `PUBLIC_BASE_URL` | `https://<your-domain>` *(also drives the CORS allowlist + `/api/contact` Origin check — must match the real public origin)* |
 | `SQLITE_DATABASE_PATH` | `/app/backend/data/app.db` |
 | `SESSION_SECRET` | *(generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)* |
 | `GITHUB_CLIENT_ID` | *(from step 1)* |
 | `GITHUB_CLIENT_SECRET` | *(from step 1)* |
 | `AUTH_ALLOWLIST` | `gasalaza` |
+| `TRUST_PROXY` | `2` *(Cloudflare → Railway = 2 proxy hops; default is `1`. Validate the real X-Forwarded-For chain in staging — wrong value weakens rate limiting)* |
+| `CONTACT_EMAIL_DAILY_CAP` | `50` *(caps Resend sends per rolling 24 h; protects the free-tier 100/day quota and prevents inbox flooding. Submissions still persist + return 201 after the cap)* |
 
 ### Web service
 

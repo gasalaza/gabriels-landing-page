@@ -92,6 +92,18 @@ export function getSubmission(id: number): ContactSubmission | null {
   });
 }
 
+export function countRecentSubmissions(withinHours = 24): number {
+  return withDatabase((database) => {
+    const row = database
+      .prepare(
+        `SELECT COUNT(*) AS c FROM contact_submissions
+         WHERE datetime(created_at) > datetime('now', ? || ' hours')`,
+      )
+      .get(`-${withinHours}`) as { c: number };
+    return row.c;
+  });
+}
+
 export function markRead(id: number): boolean {
   return withDatabase((database) => {
     const result = database.prepare('UPDATE contact_submissions SET read = 1 WHERE id = ?').run(id);

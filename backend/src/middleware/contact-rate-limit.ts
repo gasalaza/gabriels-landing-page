@@ -1,4 +1,5 @@
 import rateLimit from 'express-rate-limit';
+import { getClientIp } from './client-ip.js';
 
 function readPositiveInteger(name: string, fallback: number): number {
   const value = process.env[name];
@@ -14,6 +15,7 @@ export function createContactRateLimiter() {
     limit: readPositiveInteger('CONTACT_RATE_LIMIT_MAX', 5),
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => getClientIp(req),
     message: {
       error: {
         code: 'RATE_LIMITED',

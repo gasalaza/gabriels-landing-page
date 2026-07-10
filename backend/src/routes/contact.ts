@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { insertSubmission } from '../db/contact.js';
+import { countRecentSubmissions, insertSubmission } from '../db/contact.js';
 import { createContactRateLimiter } from '../middleware/contact-rate-limit.js';
 import { contactSubmissionSchema } from '../validation/contact.js';
 import { sendContactNotification } from '../email/contact-notification.js';
+import { loadConfig } from '../config.js';
 
 export function createContactRouter() {
   const contactRouter = Router();
@@ -33,15 +34,23 @@ export function createContactRouter() {
       message: parsed.data.message,
     });
 
-    try {
-      await sendContactNotification({
-        name: parsed.data.name,
-        email: parsed.data.email,
-        projectType: parsed.data.projectType,
-        message: parsed.data.message,
-      });
-    } catch {
-      // Email failure must never affect the 201 response
+    // Daily email cap — skip notification if too many submissions in the last 24h
+    const config = loadConfig();
+    const recentCount = countRecentSubmissions(24);
+
+    if (recentCount > config.contactEmailDailyCap) {
+      console.info('[contact] email skipped: daily cap reached');
+    } else {
+      try {
+        await sendContactNotification({
+          name: parsed.data.name,
+          email: parsed.data.email,
+          projectType: parsed.data.projectType,
+          message: parsed.data.message,
+        });
+      } catch {
+        // Email failure must never affect the 201 response
+      }
     }
 
     response.status(201).json({ ok: true });
