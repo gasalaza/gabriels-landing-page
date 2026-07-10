@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { Contact } from './Contact';
 
 function getSubmitButton() {
@@ -8,6 +8,10 @@ function getSubmitButton() {
   );
   return buttons[0]!;
 }
+
+afterEach(() => {
+  cleanup();
+});
 
 describe('Contact section', () => {
   beforeEach(() => {
@@ -21,7 +25,37 @@ describe('Contact section', () => {
 
     expect(await screen.findByText(/your name, please/i)).toBeInTheDocument();
     expect(screen.getByText(/that email doesn't look right/i)).toBeInTheDocument();
-    expect(screen.getByText(/add a note about your project/i)).toBeInTheDocument();
+  });
+
+  it('submits successfully with empty message (optional)', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      status: 201,
+      json: async () => ({}),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    render(<Contact />);
+
+    fireEvent.change(screen.getByLabelText(/your name/i), { target: { value: 'Test User' } });
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'test@example.com' } });
+
+    fireEvent.click(getSubmitButton());
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Test User',
+          email: 'test@example.com',
+          message: '',
+          projectType: 'landing',
+          website: '',
+        }),
+      });
+    });
+
+    expect(await screen.findByText(/message sent/i)).toBeInTheDocument();
   });
 
   it('submits successfully with correct payload', async () => {

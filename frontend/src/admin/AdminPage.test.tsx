@@ -272,6 +272,89 @@ describe('Logout', () => {
   });
 });
 
+describe('Delete message', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    Object.defineProperty(document, 'cookie', {
+      writable: true,
+      value: '__csrf=testcsrf',
+    });
+  });
+
+  it('deletes a message via detail panel and removes the row', async () => {
+    const mockFetch = vi.fn().mockImplementation((url: string, opts?: RequestInit) => {
+      if (url === '/api/admin/me') {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ login: 'gabriel' }),
+        });
+      }
+      if (typeof url === 'string' && url.startsWith('/api/admin/messages') && !opts?.method) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            items: [
+              {
+                id: 'msg-del-1',
+                name: 'DeleteMe',
+                email: 'del@test.com',
+                projectType: 'landing',
+                message: 'Please delete this',
+                createdAt: '2026-07-01T12:00:00Z',
+                read: false,
+              },
+            ],
+            total: 1,
+            limit: 20,
+            offset: 0,
+          }),
+        });
+      }
+      if (opts?.method === 'DELETE') {
+        return Promise.resolve({
+          ok: true,
+          status: 204,
+          json: async () => ({}),
+        });
+      }
+      return Promise.resolve({ ok: true, status: 200, json: async () => ({}) });
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    // Stub window.confirm to auto-accept
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    renderAdmin();
+
+    // Wait for the row to render, then click it to open detail
+    const row = await screen.findByText('DeleteMe');
+    fireEvent.click(row);
+
+    // Detail panel should show
+    const deleteBtn = await screen.findByRole('button', { name: /delete message/i });
+    fireEvent.click(deleteBtn);
+
+    // Verify DELETE was called with CSRF header
+    await waitFor(() => {
+      const deleteCall = mockFetch.mock.calls.find(
+        (c) => (c as [string, RequestInit?])[1]?.method === 'DELETE',
+      ) as [string, RequestInit] | undefined;
+      expect(deleteCall).toBeDefined();
+      expect(deleteCall![0]).toBe('/api/admin/messages/msg-del-1');
+      expect(deleteCall![1].headers).toEqual(
+        expect.objectContaining({ 'X-CSRF-Token': 'testcsrf' }),
+      );
+    });
+
+    // Row should be removed
+    await waitFor(() => {
+      expect(screen.queryByText('DeleteMe')).not.toBeInTheDocument();
+    });
+  });
+});
+
 describe('Pagination', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
