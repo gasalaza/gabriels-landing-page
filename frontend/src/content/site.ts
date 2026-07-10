@@ -77,7 +77,7 @@ export const SERVICES: Service[] = [
       'Security & vulnerability assessments',
       'Secure code review',
       'Threat detection & hardening',
-      'Penetration testing (expanding)',
+      'Pentest skills in development — not yet a standalone service',
     ],
   },
 ];
