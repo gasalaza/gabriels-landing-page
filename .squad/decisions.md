@@ -107,6 +107,18 @@
 
 **Why:** The old plan's `APP_ALLOWED_HOSTS` / `CONTACT_RATE_LIMIT_*` do NOT exist in code. This is the runtime reality. Documented in DEPLOYMENT.md + .env.example.
 
+### 2026-07-10: Pre-deploy hardening and admin workflow decisions
+
+**By:** Scribe, from Tank/Trinity/Neo pre-deploy batch
+
+**Context:** PRs #36-#38 shipped optional contact messages, admin message management, and pre-deploy security remediation after Neo's OWASP Web Top 10 / DDoS audit.
+
+**Decisions:**
+- **Zero-new-dependency security posture:** CORS/Origin guard is implemented manually (no `cors` package) to avoid `npm ci` breaking the shared clone's `better-sqlite3` native binding.
+- **Trusted client IP contract:** Rate limiting trusts `cf-connecting-ip` only because the backend is private and Cloudflare-fronted; validate `TRUST_PROXY` in staging (Cloudflare → Railway = 2 hops, production value `2`).
+- **LLM surface gate:** OWASP LLM Top 10 is N/A today because there is no AI surface; re-review is required before shipping any future LiteRT/on-device-AI demo, with scoped CSP and model output treated as untrusted.
+- **Single-admin-by-design:** DELETE/PATCH admin endpoints have no per-row ownership check because there is exactly one allowlisted admin (`gasalaza`); revisit if multi-admin is added.
+
 ## Governance
 - All meaningful changes require team consensus
 - Document architectural decisions here
