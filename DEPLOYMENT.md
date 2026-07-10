@@ -84,6 +84,20 @@ On the **web** service:
 
 ---
 
+## 5a. ⚠️ Restrict the Raw Railway URL (required)
+
+Backend rate limiting trusts the `cf-connecting-ip` header, which is only reliable when **all** traffic reaches the app through Cloudflare. If Railway's auto-generated public URL (`*.up.railway.app`) is left reachable, an attacker can hit it directly, bypass Cloudflare, and spoof `cf-connecting-ip` to defeat rate limiting.
+
+Once the custom domain is live behind Cloudflare:
+
+- **Web (Caddy) service:** remove or disable the generated `*.up.railway.app` domain in Railway settings — the only public domain should be `gasalaza.com` (via Cloudflare).
+- **Backend service:** keep it on Railway **private networking** (it already is — only Caddy can reach it via `backend.railway.internal`).
+- Verify: the only public entry point is the Caddy service, and all public traffic flows through Cloudflare.
+
+This is a Railway dashboard setting, not a code change.
+
+---
+
 ## 6. Local Testing with Docker Compose
 
 ```bash
