@@ -1,12 +1,24 @@
+# Web service — builds React SPA, serves via Caddy with /api reverse proxy
 FROM node:22-alpine AS builder
+
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
-COPY package.json package-lock.json* ./
-COPY backend/package.json backend/package.json
-COPY frontend/package.json frontend/package.json
-RUN npm install
-COPY frontend frontend
+
+COPY package.json package-lock.json ./
+COPY backend/package.json backend/
+COPY frontend/package.json frontend/
+
+RUN npm ci
+
+COPY frontend/ frontend/
+# tsc -b needs tsconfig.node.json referenced by frontend build
 RUN npm run build --workspace @gabriels-portfolio/frontend
 
+# --- Runner ---
 FROM caddy:2-alpine
-COPY Caddyfile.railway /etc/caddy/Caddyfile
+
 COPY --from=builder /app/frontend/dist /srv
+COPY Caddyfile.railway /etc/caddy/Caddyfile
+
+EXPOSE 8080
