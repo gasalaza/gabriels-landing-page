@@ -1,0 +1,8 @@
+# Security policy for gasalaza.com
+# We support responsible disclosure. If you have found a vulnerability,
+# please contact us using the address below. Thank you for helping keep this site safe.
+
+Contact: mailto:security@gasalaza.com
+Expires: 2027-07-10T00:00:00.000Z
+Preferred-Languages: en, es
+Canonical: https://gasalaza.com/.well-known/security.txt
