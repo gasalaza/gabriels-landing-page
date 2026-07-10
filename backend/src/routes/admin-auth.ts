@@ -145,7 +145,7 @@ export function createAdminAuthRouter({ db, config, githubAuth }: AdminAuthRoute
       httpOnly: false,
       secure: secureCookie,
       sameSite: 'lax',
-      path: '/api/admin',
+      path: '/',
       maxAge: SESSION_COOKIE_MAX_AGE,
     });
 
