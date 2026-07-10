@@ -23,7 +23,6 @@ function ServiceCard({ s, featured }: { s: Service; featured: boolean }) {
         {featured && <div style={servicesStyles.cardFeatured}>Most popular</div>}
       </div>
       <h3 style={servicesStyles.cardTitle}>{s.title}</h3>
-      <div style={servicesStyles.cardPrice}>{s.price}</div>
       <p style={servicesStyles.cardDesc}>{s.desc}</p>
       <div style={servicesStyles.divider} />
       <ul style={servicesStyles.points}>
@@ -140,12 +139,6 @@ const servicesStyles = {
     lineHeight: 1.2,
     margin: '0 0 10px',
     textWrap: 'balance',
-  } as CSSProperties,
-  cardPrice: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: 13,
-    color: 'var(--accent)',
-    marginBottom: 16,
   } as CSSProperties,
   cardDesc: {
     fontSize: 14,

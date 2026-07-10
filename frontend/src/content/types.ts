@@ -27,7 +27,6 @@ export interface StackGroup {
 export interface Service {
   badge: string;
   title: string;
-  price: string;
   desc: string;
   points: string[];
 }
