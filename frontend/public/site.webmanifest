@@ -1,0 +1,20 @@
+{
+  "name": "Gabriel Salazar — Software Engineer",
+  "short_name": "gasalaza",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1017",
+  "theme_color": "#34d399"
+}
