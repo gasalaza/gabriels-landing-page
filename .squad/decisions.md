@@ -59,6 +59,54 @@
 
 **Content/PII review:** Rai confirmed no Microsoft in shipped content, CV removed, phone number NOT rendered, no PII/secrets leaked, content clean. 🟢 GREEN.
 
+### 2026-07-09T22:09:23-0600: Phase 4-5 — deploy topology & production security headers
+
+**By:** Tank (backend/infra), Neo (security review)
+
+**What:** Railway deploy topology finalized as two services: private `backend` (Node/Express, SQLite on volume at /app/backend/data) + public `web` (Caddy: serves SPA, reverse-proxies /api/* to backend, terminates security headers). Single browser origin. Deployed via:
+- `Dockerfile` (backend): multi-stage Alpine Node 22, non-root user, better-sqlite3 native build, schema.sql runtime copy, healthcheck
+- `Dockerfile.railway-web`: Vite build → Caddy 2 Alpine
+- `Caddyfile.railway`: full CSP (script-src 'self', no unsafe-inline; style-src allows 'unsafe-inline' for React inline styles + Google Fonts; img-src allows GitHub avatars; connect-src 'self'), HSTS preload, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy, Server header removed
+- `docker-compose.yml` (local full-stack dev)
+- `.env.example` (placeholders only, no secrets)
+- `DEPLOYMENT.md` (Railway service topology + env contract)
+
+**Why:** Security headers delivered at the Caddy edge (single enforcement point, no JS bundler CSP) for defense-in-depth. Docker builds verified + compose smoke test passed. PR #19 merged (1761e53). Neo review: 🟢 GREEN (CSP correct, Docker hardened, secret hygiene clean).
+
+### 2026-07-09T22:09:23-0600: Phase 4 — backend hardening (HMAC-signed OAuth state + input bounds)
+
+**By:** Tank (backend), Neo (security review)
+
+**What:** HMAC-sign the `__pa` OAuth state cookie (reused the single existing hmacSign signer derived from SESSION_SECRET + added hmacVerify; verify-before-parse; state-equality check preserved; cookie attrs unchanged). Added input-bounds validation tests (asserted existing zod limits, none weakened). 15 new backend tests (24→39 total). PR #20 merged (23fca54). Neo review: 🟢 GREEN (all 7 axes; __session signer byte-for-byte unchanged).
+
+**Why:** HMAC integrity is additive to the existing random-state equality check. Single signer avoids parallel HMAC schemes. Verify-before-parse blocks tampered input before processing.
+
+### 2026-07-09T22:09:23-0600: Phase 4 — supply-chain pinning (SHA-pinned Actions + Docker images)
+
+**By:** Tank (infra), Neo (security review)
+
+**What:** SHA-pinned all GitHub Actions across 5 workflows (checkout@v4, setup-node@v4, github-script@v7) to commit SHAs with `#v{tag}` comments. SHA-pinned Docker base images to multi-arch index digests (node:22-alpine, caddy:2-alpine). Added `docker` ecosystem to dependabot.yml so pins auto-bump. PR #21 merged (d91af04). Neo review: 🟢 GREEN (mechanical pins only, no tampering, index digests, scoped).
+
+**Why:** Supply-chain attacks blocked at CI/build time. Dependabot watches npm + github-actions + docker for security bumps (no patch-freeze). Multi-arch index digests ensure amd64 deploy targets resolve correctly (local arch digests would fail on Railway).
+
+### 2026-07-09T22:09:23-0600: Backend environment contract (definitive)
+
+**By:** Tank (backend)
+
+**What:** The definitive backend env contract (source of truth = backend/src/config.ts):
+- NODE_ENV
+- PORT
+- PUBLIC_BASE_URL
+- SQLITE_DATABASE_PATH
+- SESSION_SECRET
+- GITHUB_CLIENT_ID
+- GITHUB_CLIENT_SECRET
+- AUTH_ALLOWLIST
+- AUTH_RATE_LIMIT_WINDOW_MS
+- AUTH_RATE_LIMIT_MAX
+
+**Why:** The old plan's `APP_ALLOWED_HOSTS` / `CONTACT_RATE_LIMIT_*` do NOT exist in code. This is the runtime reality. Documented in DEPLOYMENT.md + .env.example.
+
 ## Governance
 - All meaningful changes require team consensus
 - Document architectural decisions here
