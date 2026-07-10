@@ -4,7 +4,7 @@ export const SITE: SiteInfo = {
   name: 'Gabriel Salazar',
   role: 'Software Engineer / Full Stack Developer',
   tagline: 'Shipping clean, scalable systems for 10+ years.',
-  location: 'San José, Costa Rica',
+  location: 'San José, Costa Rica 🇨🇷',
   email: 'gabrielsalazar3092@gmail.com',
   linkedin: 'LinkedIn',
   available: 'Available for freelance · Q2 2026',
