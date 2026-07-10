@@ -1,0 +1,25 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      SQLITE_DATABASE_PATH: /app/backend/data/app.db
+    volumes:
+      - sqlite-data:/app/backend/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.railway-web
+    environment:
+      PORT: "8080"
+      BACKEND_UPSTREAM: "http://backend:3000"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+
+volumes:
+  sqlite-data:
