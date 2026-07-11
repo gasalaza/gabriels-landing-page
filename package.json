@@ -16,6 +16,8 @@
     "build": "npm run build --workspace @gabriels-portfolio/backend && npm run build --workspace @gabriels-portfolio/frontend",
     "test": "npm run test --workspace @gabriels-portfolio/backend && npm run test --workspace @gabriels-portfolio/frontend",
     "lint": "npm run lint --workspace @gabriels-portfolio/backend && npm run lint --workspace @gabriels-portfolio/frontend",
-    "typecheck": "npm run typecheck --workspace @gabriels-portfolio/backend && npm run typecheck --workspace @gabriels-portfolio/frontend"
+    "typecheck": "npm run typecheck --workspace @gabriels-portfolio/backend && npm run typecheck --workspace @gabriels-portfolio/frontend",
+    "notify": "node --env-file-if-exists=.env scripts/notify.mjs",
+    "test:scripts": "node --test 'scripts/*.test.mjs'"
   }
 }
