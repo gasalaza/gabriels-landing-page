@@ -80,18 +80,15 @@ Run these checks after the first deploy and confirm the expected results.
 
 We deliberately deferred this to avoid loosening CSP before launch. To enable privacy-friendly, cookieless analytics:
 
-1. Cloudflare dashboard → Web Analytics → Add site → copy the beacon token.
-2. Add the beacon script to `frontend/index.html`:
-   ```html
-   <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "YOUR_TOKEN"}'></script>
-   ```
-3. Update CSP in `Caddyfile.railway` — add **exactly** these two origins (pre-approved by Neo):
-   - `https://static.cloudflareinsights.com` to `script-src`
-   - `https://cloudflareinsights.com` to `connect-src`
+1. Cloudflare dashboard → Web Analytics → Add site (gasalaza.com) → copy the beacon token.
+2. Set `VITE_CF_BEACON_TOKEN=<token>` in the Railway **build** env (build-time; redeploy so Vite inlines it). The beacon loads in production builds only — local dev stays clean.
+3. CSP already updated in `Caddyfile.railway` AND `backend/src/middleware/security-headers.ts` with the two pre-approved Cloudflare origins:
+   - `https://static.cloudflareinsights.com` in `script-src`
+   - `https://cloudflareinsights.com` in `connect-src`
 
 **This is the only CSP change approved for analytics.** Do not add any other origins without a security review.
 
-Cloudflare Web Analytics is free on all plans, uses no cookies, and is GDPR-friendly. It provides page views, referrers, countries, browsers, and Core Web Vitals.
+Cloudflare Web Analytics is free on all plans, uses no cookies, and is GDPR-friendly (no consent banner needed). It provides page views, referrers, countries, browsers, and Core Web Vitals.
 
 ---
 
