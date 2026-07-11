@@ -154,3 +154,29 @@ The backend optionally emails you when someone submits the contact form, using [
 - `SESSION_SECRET` lives only in Railway env vars — rotate immediately if leaked.
 - GitHub OAuth Client Secret: regenerate in GitHub settings if compromised.
 - SQLite data lives on the Railway volume — enable Railway's backup snapshots.
+
+---
+
+## 10. Work-summary notifications (scripts/notify.mjs)
+
+A zero-dependency Node ESM script that sends work-summary emails via the same Resend API used by the contact-form notifier. Reuses `RESEND_API_KEY`, `CONTACT_NOTIFY_TO`, and `CONTACT_NOTIFY_FROM` from the environment (plus an optional `NOTIFY_TO` override).
+
+**Usage:**
+
+```bash
+# Send a notification (loads .env automatically via --env-file-if-exists)
+npm run notify -- --subject "Deploy done" --body "v0.1 shipped to Railway."
+
+# Dry-run (prints payload, no actual send)
+node --env-file-if-exists=.env scripts/notify.mjs --dry-run --subject "Test" --body "Hello"
+
+# Pipe body from another command
+echo "Summary of work" | npm run notify -- --subject "Daily update"
+
+# Read body from file
+npm run notify -- --subject "Report" --body-file ./report.txt
+```
+
+**CLI flags:** `--subject` (required), `--body`, `--body-file`, `--to`, `--from`, `--dry-run`, `--help`.
+
+**Run tests:** `npm run test:scripts` (uses Node's built-in test runner, no network).
