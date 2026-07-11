@@ -30,11 +30,11 @@ describe('useTheme', () => {
     expect(document.documentElement.dataset['theme']).toBe('dark');
   });
 
-  it('defaults to light when prefers-color-scheme is light and no storage', () => {
+  it('defaults to dark even when prefers-color-scheme is light (ignores system preference)', () => {
     mockMatchMedia(true);
     const { result } = renderHook(() => useTheme());
-    expect(result.current.theme).toBe('light');
-    expect(document.documentElement.dataset['theme']).toBe('light');
+    expect(result.current.theme).toBe('dark');
+    expect(document.documentElement.dataset['theme']).toBe('dark');
   });
 
   it('reads stored theme from localStorage', () => {
