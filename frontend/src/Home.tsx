@@ -9,8 +9,8 @@ export function Home() {
         <About />
         <Stack />
         <Services />
-        <Security />
         <Contact />
+        <Security />
       </main>
       <Footer />
     </>
