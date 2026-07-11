@@ -138,10 +138,9 @@ export function Security() {
           <div style={s.disclosure}>
             <div style={s.disclosureTitle}>Found a security issue?</div>
             <p style={s.disclosureText}>
-              I welcome good-faith vulnerability reports. Please reach out using the contact
-              information in my{' '}
-              <a href={SECURITY_POSTURE.linkHref} style={s.link}>
-                security.txt
+              I welcome good-faith vulnerability reports. Please email me at{' '}
+              <a href="mailto:security@gasalaza.com" style={s.link}>
+                security@gasalaza.com
               </a>{' '}
               with a description of the issue and steps to reproduce. I&apos;ll acknowledge
               your report within 3 business days. Thank you for helping keep this site safe.

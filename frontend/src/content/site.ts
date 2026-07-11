@@ -111,11 +111,11 @@ export const SECURITY_POSTURE: SecurityPosture = {
       text: 'generic error responses in production, structured security-event logging, and server-level timeout hardening.',
     },
   ],
-  linkLine: 'Found a vulnerability? I take reports seriously \u2014 see my ',
-  linkText: 'security.txt',
-  linkHref: '/.well-known/security.txt',
+  linkLine: 'Found a vulnerability? I take reports seriously \u2014 email me at ',
+  linkText: 'security@gasalaza.com',
+  linkHref: 'mailto:security@gasalaza.com',
   chips: ['Security+', 'CySA+', '\u{1F1E8}\u{1F1F7}'],
   disclosure:
-    'I welcome good-faith vulnerability reports. Please reach out using the contact information in my security.txt with a description of the issue and steps to reproduce. I\u2019ll acknowledge your report within 3 business days. Thank you for helping keep this site safe.',
+    'I welcome good-faith vulnerability reports. Please email me at security@gasalaza.com with a description of the issue and steps to reproduce. I\u2019ll acknowledge your report within 3 business days. Thank you for helping keep this site safe.',
 };
 
