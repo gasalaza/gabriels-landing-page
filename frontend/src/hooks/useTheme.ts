@@ -10,7 +10,9 @@ function getInitialTheme(): Theme {
   } catch {
     // localStorage unavailable (private mode)
   }
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  // Default everyone to dark on first visit; a returning visitor's saved
+  // choice above still wins.
+  return 'dark';
 }
 
 export function useTheme(): { theme: Theme; toggle: () => void } {
