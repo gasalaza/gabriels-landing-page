@@ -92,7 +92,7 @@ export function Services() {
 const servicesStyles = {
   section: {
     background:
-      'linear-gradient(180deg, transparent 0%, oklch(0.12 0.008 255) 50%, transparent 100%)',
+      'linear-gradient(180deg, transparent 0%, var(--section-tint) 50%, transparent 100%)',
   } as CSSProperties,
   head: { marginBottom: 56, maxWidth: 700 } as CSSProperties,
   grid: {

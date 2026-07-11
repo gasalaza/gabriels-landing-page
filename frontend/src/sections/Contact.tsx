@@ -301,7 +301,7 @@ function Field({ label, name, value, onChange, error, focused, onFocus, onBlur, 
       <div
         style={{
           ...contactStyles.inputWrap,
-          borderColor: error ? 'oklch(0.65 0.18 25)' : focused ? 'var(--accent)' : 'var(--border)',
+          borderColor: error ? 'var(--danger)' : focused ? 'var(--accent)' : 'var(--border)',
           boxShadow: focused && !error ? '0 0 0 3px var(--accent-dim)' : 'none',
         }}
       >
@@ -440,13 +440,13 @@ const contactStyles = {
     border: '1px solid var(--border)',
     borderRadius: 14,
     overflow: 'hidden',
-    boxShadow: '0 24px 48px -20px oklch(0 0 0 / 0.5)',
+    boxShadow: '0 24px 48px -20px var(--card-shadow)',
     position: 'relative',
   } as CSSProperties,
   formHead: {
     padding: '10px 14px',
     borderBottom: '1px solid var(--border)',
-    background: 'oklch(0.2 0.008 255)',
+    background: 'var(--window-chrome)',
     display: 'flex',
     alignItems: 'center',
     gap: 14,
@@ -494,16 +494,16 @@ const contactStyles = {
   err: {
     fontFamily: 'var(--font-mono)',
     fontSize: 11,
-    color: 'oklch(0.72 0.18 25)',
+    color: 'var(--danger-fg)',
     marginTop: 6,
   } as CSSProperties,
   errorBanner: {
     padding: '10px 14px',
     borderRadius: 8,
-    background: 'oklch(0.65 0.18 25 / 0.1)',
-    border: '1px solid oklch(0.65 0.18 25 / 0.3)',
+    background: 'var(--danger-dim)',
+    border: '1px solid var(--danger-border)',
     fontSize: 13,
-    color: 'oklch(0.72 0.18 25)',
+    color: 'var(--danger-fg)',
   } as CSSProperties,
   budgetGrid: {
     display: 'grid',

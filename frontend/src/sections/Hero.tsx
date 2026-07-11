@@ -191,7 +191,7 @@ const heroStyles = {
     overflow: 'hidden',
     border: '1px solid var(--border)',
     background: 'var(--bg-elevated)',
-    boxShadow: '0 40px 80px -30px oklch(0 0 0 / 0.6), 0 0 0 1px oklch(1 0 0 / 0.02)',
+    boxShadow: '0 40px 80px -30px var(--photo-shadow), 0 0 0 1px var(--photo-ring)',
   } as CSSProperties,
   photo: {
     width: '100%',
@@ -202,7 +202,7 @@ const heroStyles = {
   photoOverlay: {
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(180deg, transparent 40%, oklch(0.14 0.008 255 / 0.85) 100%)',
+    background: 'linear-gradient(180deg, transparent 40%, var(--photo-fade) 100%)',
     pointerEvents: 'none',
   } as CSSProperties,
   photoTag: {
@@ -213,7 +213,7 @@ const heroStyles = {
     alignItems: 'center',
     gap: 8,
     padding: '6px 10px',
-    background: 'oklch(0.14 0.008 255 / 0.72)',
+    background: 'var(--nav-bg)',
     backdropFilter: 'blur(8px)',
     WebkitBackdropFilter: 'blur(8px)',
     border: '1px solid var(--border)',
@@ -235,7 +235,7 @@ const heroStyles = {
   photoK: {
     fontFamily: 'var(--font-mono)',
     fontSize: 10,
-    color: 'oklch(1 0 0 / 0.5)',
+    color: 'var(--photo-label)',
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
     marginBottom: 4,
