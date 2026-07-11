@@ -1,5 +1,6 @@
 import { useState, useEffect, type CSSProperties } from 'react';
 import { Icon } from '../components';
+import { useTheme } from '../hooks/useTheme';
 
 const links: [string, string][] = [
   ['About', '#about'],
@@ -15,7 +16,7 @@ const navStyles = {
     right: 0,
     zIndex: 50,
     padding: scrolled ? '10px 0' : '18px 0',
-    background: scrolled ? 'oklch(0.14 0.008 255 / 0.72)' : 'transparent',
+    background: scrolled ? 'var(--nav-bg)' : 'transparent',
     backdropFilter: scrolled ? 'saturate(160%) blur(12px)' : 'none',
     WebkitBackdropFilter: scrolled ? 'saturate(160%) blur(12px)' : 'none',
     borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
@@ -63,10 +64,24 @@ const navStyles = {
     borderRadius: 6,
     transition: 'color 160ms, background 160ms',
   } as CSSProperties,
+  themeToggle: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 36,
+    height: 36,
+    border: '1px solid var(--border)',
+    borderRadius: 6,
+    background: 'transparent',
+    color: 'var(--fg-muted)',
+    cursor: 'pointer',
+    transition: 'background 160ms, border-color 160ms',
+  } as CSSProperties,
 };
 
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const { theme, toggle } = useTheme();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -94,6 +109,15 @@ export function Nav() {
             </a>
           ))}
         </div>
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          style={navStyles.themeToggle}
+        >
+          <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={16} />
+        </button>
         <a href="#contact" className="btn btn-primary" style={{ height: 36 }}>
           Let&apos;s talk
           <Icon name="arrow" size={14} />
