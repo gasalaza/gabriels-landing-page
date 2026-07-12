@@ -23,8 +23,9 @@ export function applySecurityHeaders() {
   return (_request: Request, response: Response, next: NextFunction) => {
     response.setHeader('X-Content-Type-Options', 'nosniff');
     response.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    response.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
     response.setHeader('X-Frame-Options', 'DENY');
+    response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     response.setHeader('Content-Security-Policy', csp);
     next();
   };

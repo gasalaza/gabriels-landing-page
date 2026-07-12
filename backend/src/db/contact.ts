@@ -64,15 +64,18 @@ export function insertSubmission(input: ContactSubmissionInput): number {
   });
 }
 
-export function listSubmissions(): ContactSubmission[] {
+const DEFAULT_LIST_LIMIT = 500;
+
+export function listSubmissions(limit: number = DEFAULT_LIST_LIMIT): ContactSubmission[] {
   return withDatabase((database) => {
     const rows = database
       .prepare(
         `SELECT id, name, email, project_type, message, created_at, read
          FROM contact_submissions
-         ORDER BY datetime(created_at) DESC, id DESC`,
+         ORDER BY datetime(created_at) DESC, id DESC
+         LIMIT ?`,
       )
-      .all() as ContactSubmissionRow[];
+      .all(limit) as ContactSubmissionRow[];
 
     return rows.map(mapSubmission);
   });
