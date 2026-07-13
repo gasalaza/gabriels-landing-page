@@ -20,7 +20,7 @@ function ServiceCard({ s, featured }: { s: Service; featured: boolean }) {
     >
       <div style={servicesStyles.cardHead}>
         <div style={servicesStyles.cardBadge}>{s.badge}</div>
-        {featured && <div style={servicesStyles.cardFeatured}>Most popular</div>}
+        {featured && <div style={servicesStyles.cardFeatured}>Start here</div>}
       </div>
       <h3 style={servicesStyles.cardTitle}>{s.title}</h3>
       <p style={servicesStyles.cardDesc}>{s.desc}</p>
@@ -35,14 +35,27 @@ function ServiceCard({ s, featured }: { s: Service; featured: boolean }) {
           </li>
         ))}
       </ul>
-      <a
-        href="#contact"
-        className={featured ? 'btn btn-primary' : 'btn btn-ghost'}
-        style={{ width: '100%', marginTop: 20 }}
-      >
-        Get a quote
-        <Icon name="arrow" size={14} />
-      </a>
+      {s.badge === '03' ? (
+        <a
+          href="#security"
+          className="btn btn-ghost"
+          style={{ width: '100%', marginTop: 20 }}
+        >
+          Learn more
+          <Icon name="arrow" size={14} />
+        </a>
+      ) : (
+        <a
+          href="https://cal.com/gasalazacr/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={featured ? 'btn btn-primary' : 'btn btn-ghost'}
+          style={{ width: '100%', marginTop: 20 }}
+        >
+          Book a call
+          <Icon name="arrow" size={14} />
+        </a>
+      )}
     </div>
   );
 }
@@ -55,10 +68,9 @@ export function Services() {
           <Reveal>
             <div>
               <div className="section-label">Services</div>
-              <h2 className="section-title">Three ways we can work together.</h2>
+              <h2 className="section-title">What I build.</h2>
               <p className="section-sub">
-                From a single landing page to a full-stack product or a backend audit — pick the
-                scope, I&apos;ll bring the engineering.
+                Fast, secure digital products — from a single landing page to a production web app.
               </p>
             </div>
           </Reveal>
@@ -76,10 +88,15 @@ export function Services() {
           <div style={servicesStyles.footer}>
             <div style={servicesStyles.footerL}>
               <span className="dot pulse" style={servicesStyles.liveDot} />
-              <span>Taking on 1–2 new projects for Q2 2026.</span>
+              <span>Taking on 1–2 new projects for Q3 2026.</span>
             </div>
-            <a href="#contact" className="btn btn-ghost">
-              Start a project
+            <a
+              href="https://cal.com/gasalazacr/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-ghost"
+            >
+              Book a free intro call
               <Icon name="arrow" size={14} />
             </a>
           </div>

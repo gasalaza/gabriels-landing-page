@@ -3,11 +3,11 @@ import type { SiteInfo, Skills, StackGroup, Service, SecurityPosture } from './t
 export const SITE: SiteInfo = {
   name: 'Gabriel Salazar',
   role: 'Software Engineer / Full Stack Developer',
-  tagline: 'Shipping clean, scalable systems for 10+ years.',
+  tagline: 'Building fast, secure sites for founders.',
   location: 'San José, Costa Rica 🇨🇷',
   email: 'gabrielsalazar3092@gmail.com',
   linkedin: 'LinkedIn',
-  available: 'Available for freelance · Q2 2026',
+  available: 'Available for freelance · Q3 2026',
   about: `Software Engineer with 10+ years across backend and frontend work.
 I build clean, efficient and scalable solutions, leading .NET services and mentoring engineers. I care about sound architecture, fast iteration, and code that's boring in the best way.`,
   stats: [
@@ -49,35 +49,35 @@ export const STACK_GROUPS: StackGroup[] = [
 export const SERVICES: Service[] = [
   {
     badge: '01',
-    title: 'Landing pages & marketing sites',
-    desc: 'Next.js + Tailwind + shadcn. Fast, accessible, CMS-ready. Perfect for product launches and personal brands.',
+    title: 'Full-stack web applications',
+    desc: 'React or Next.js front-end, .NET or Node backend, SQL or Cosmos DB. Auth, payments, admin — the full product.',
     points: [
-      'Next.js 15 + App Router',
-      'Tailwind v4 design system',
-      'Analytics + SEO',
-      'Responsive + accessible',
+      'TypeScript end-to-end',
+      'Auth + role-based access',
+      'Deploy-ready for Azure or Vercel',
+      'Handoff documentation included',
     ],
   },
   {
     badge: '02',
-    title: 'Full-stack web applications',
-    desc: 'React or Next.js front-end, .NET or Node backend, SQL or Cosmos DB. Auth, payments, admin — the lot.',
+    title: 'Landing pages & marketing sites',
+    desc: 'Next.js + Tailwind + shadcn. Fast, accessible, CMS-ready. Perfect for product launches and personal brands.',
     points: [
-      'TypeScript end-to-end',
-      'Auth + role-based access',
-      'Deploy to Azure or Vercel',
-      'Handoff & docs included',
+      'Sub-second load times',
+      'Mobile-first + accessible',
+      'SEO + analytics wired in',
+      'Secure by default',
     ],
   },
   {
     badge: '03',
-    title: 'Security reviews & secure development',
-    desc: 'Security assessments, vulnerability analysis, secure code review, and infrastructure hardening. Grounded in CompTIA Security+ and CySA+ — pragmatic recommendations you can ship this quarter.',
+    title: 'Security baked in',
+    desc: "Every project ships with hardened headers, input validation, dependency scanning, and secure architecture. Security+ & CySA+ certified — it's not an add-on, it's the baseline.",
     points: [
-      'Security & vulnerability assessments',
-      'Secure code review',
-      'Threat detection & hardening',
-      'Pentest skills in development — not yet a standalone service',
+      'OWASP Top 10 risk mitigation',
+      'Secure code & dependency review',
+      'Hardened headers & CSP',
+      'Ongoing security posture guidance',
     ],
   },
 ];
