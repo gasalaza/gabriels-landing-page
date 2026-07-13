@@ -116,7 +116,8 @@ export function Contact() {
                 <em style={contactStyles.em}>something good.</em>
               </h2>
               <p className="section-sub">
-                Have a project in mind? Send me a note — I reply within 48 hours.
+                Book a call to talk about your project, or send a message below. I reply within 48
+                hours.
               </p>
 
               <div style={contactStyles.directs}>

@@ -47,25 +47,35 @@ export function Hero() {
 
           <Reveal delay={80}>
             <h1 style={heroStyles.h1}>
-              Software engineer
+              Your next site —
               <br />
-              building <span style={heroStyles.accentWord}>clean systems</span>
+              built fast,
               <br />
-              that scale.
+              <span style={heroStyles.accentWord}>built secure.</span>
             </h1>
           </Reveal>
 
           <Reveal delay={160}>
             <p style={heroStyles.lead}>
-              I&apos;m Gabriel — a full-stack engineer with a decade of C#, .NET and cloud
-              experience. Available for select Next.js, full-stack and Azure work.
+              I&apos;m Gabriel, a full-stack engineer with 10+ years of shipping production
+              software. I build landing pages and web apps for founders who care about speed,
+              security, and getting it right the first time. Security+ &amp; CySA+ certified.
             </p>
           </Reveal>
 
           <Reveal delay={240}>
             <div style={heroStyles.cta}>
-              <a href="#contact" className="btn btn-primary">
-                Get in touch
+              <a
+                href="https://cal.com/gasalazacr/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+              >
+                Book a free intro call
+                <Icon name="arrowUpRight" size={14} />
+              </a>
+              <a href="#services" className="btn btn-ghost">
+                See how I work
                 <Icon name="arrow" size={14} />
               </a>
             </div>

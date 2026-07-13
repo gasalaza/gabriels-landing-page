@@ -8,8 +8,8 @@ describe('App', () => {
 
     expect(screen.getAllByText(/gabriel salazar/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/tools i reach for/i)).toBeInTheDocument();
-    expect(screen.getByText(/three ways we can work together/i)).toBeInTheDocument();
-    expect(screen.getByText(/built secure/i)).toBeInTheDocument();
+    expect(screen.getByText(/what i build/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/built secure/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/let's build/i)).toBeInTheDocument();
   });
 
