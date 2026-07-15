@@ -1,0 +1,52 @@
+# docker-compose.prod.yml — Production VPS topology
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Requires:
+#   - .env file at repo root (see DEPLOYMENT-VPS.md §4)
+#   - ./certs/ directory with origin.pem + origin.key from Cloudflare
+#   - ./data/ directory for SQLite persistence (created automatically)
+#
+# This file is SEPARATE from docker-compose.yml (which targets local dev
+# and Railway). The existing Railway path is unaffected.
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      SQLITE_DATABASE_PATH: /app/backend/data/app.db
+      TRUST_PROXY: "1"
+    volumes:
+      - ./data:/app/backend/data
+    restart: unless-stopped
+    # No published ports — Caddy reaches the backend via the compose network
+
+  web:
+    # Uses the base caddy:2-alpine image directly and mounts our Caddyfile +
+    # a separately-built frontend. We avoid Dockerfile.railway-web because it
+    # bakes Caddyfile.railway via COPY; mounting Caddyfile.prod is cleaner and
+    # means we don't need a separate Dockerfile for the VPS web service.
+    build:
+      context: .
+      dockerfile: Dockerfile.railway-web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - ./certs:/etc/caddy/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      BACKEND_UPSTREAM: "http://backend:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
