@@ -90,6 +90,12 @@ sudo docker run --rm hello-world
 sudo usermod -aG docker deploy
 ```
 
+> **Alternative: distro packages.** On the Oracle Ubuntu image you can skip the convenience script and install Docker from Ubuntu's own repositories instead:
+> ```bash
+> sudo apt-get update && sudo apt-get install -y docker.io docker-compose-v2
+> ```
+> This gives you distro-managed updates via `unattended-upgrades` at the cost of slightly older Docker versions.
+
 ---
 
 ## 4. Clone Repo + Configure Environment
@@ -334,6 +340,15 @@ Both offer 10 GB free storage. Setup:
 ---
 
 ## 10. Enable Auto-Deploy
+
+> ### ⚠️ Before activating the deploy workflow
+>
+> These steps **cannot be completed until the Oracle/GCP instance is provisioned** and SSH-accessible:
+>
+> 1. **Populate GitHub Secrets** — add `VPS_HOST`, `VPS_USER`, and `VPS_SSH_KEY` (the deploy user's Ed25519 private key) under **Settings → Secrets and variables → Actions** in the GitHub repo.
+> 2. **Pin the VPS SSH host-key fingerprint** — SSH into the new server, retrieve its host key (`ssh-keyscan -t ed25519 <VPS_IP>`), and store the fingerprint in the workflow's `known_hosts` configuration. The deploy workflow **must** use strict host-key checking against this pinned fingerprint — never use `StrictHostKeyChecking=no`, which is vulnerable to MITM attacks.
+>
+> Until both are done, the workflow is intentionally dormant (`workflow_dispatch`-only with no secrets configured).
 
 Once the VPS is running and tested:
 

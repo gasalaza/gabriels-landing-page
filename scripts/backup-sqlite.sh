@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077   # backups contain contact-form PII — restrict to owner-only
 
 # backup-sqlite.sh — Online SQLite backup + local rotation
 #
