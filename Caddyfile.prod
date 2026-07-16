@@ -1,0 +1,54 @@
+# Caddyfile.prod — Production VPS (Caddy + Cloudflare proxy)
+#
+# TLS strategy: Cloudflare Origin Certificate (default)
+# ─────────────────────────────────────────────────────────
+# When the host firewall is locked to Cloudflare IPs only (required for
+# origin protection), Let's Encrypt HTTP-01 challenges cannot reach this
+# server — ACME-on-a-locked-box fails. A Cloudflare Origin Certificate
+# (free, 15-year validity, trusted only by Cloudflare, enables
+# Full (Strict) SSL mode) sidesteps that entirely.
+#
+# Alternative A — ACME HTTP-01 (only if NOT locking the firewall to CF IPs):
+#   Replace the `tls` directive below with just the site address; Caddy's
+#   default ACME provider handles the rest:
+#     {$SITE_ADDRESS:gasalaza.com}
+#     # (remove the tls directive entirely)
+#
+# Alternative B — ACME DNS-01 via Cloudflare DNS plugin:
+#   Build a custom Caddy image with the Cloudflare DNS module
+#   (github.com/caddy-dns/cloudflare), then:
+#     tls {
+#       dns cloudflare {env.CF_API_TOKEN}
+#     }
+#   This also works with a firewall-locked origin and uses Let's Encrypt
+#   certs instead of CF origin certs. Requires a scoped CF API token.
+
+{$SITE_ADDRESS:gasalaza.com}
+
+tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+
+header {
+	Content-Security-Policy "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://static.cloudflareinsights.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://avatars.githubusercontent.com; connect-src 'self' https://cloudflareinsights.com; frame-src 'none'; media-src 'none'; manifest-src 'self'; worker-src 'none'; upgrade-insecure-requests"
+	Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+	X-Content-Type-Options nosniff
+	Referrer-Policy strict-origin-when-cross-origin
+	X-Frame-Options DENY
+	Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	-Server
+}
+
+handle /api/* {
+	reverse_proxy {$BACKEND_UPSTREAM}
+}
+
+handle /.well-known/* {
+	root * /srv
+	header Content-Type "text/plain; charset=utf-8"
+	file_server
+}
+
+handle {
+	root * /srv
+	try_files {path} /index.html
+	file_server
+}

@@ -1,0 +1,36 @@
+# Deploy to VPS — DORMANT workflow
+#
+# This workflow is triggered ONLY by manual dispatch (workflow_dispatch).
+# It MUST NOT auto-run — it references secrets (VPS_HOST, VPS_USER,
+# VPS_SSH_KEY) that don't exist yet and would fail.
+#
+# After the VPS is provisioned and the repo secrets are added:
+#   1. Switch the trigger to `push: branches: [main]`
+#   2. Add `needs: verify` referencing the CI job so deploys wait for green CI
+#   3. Remove this dormant comment block
+
+name: Deploy to VPS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: SSH deploy to VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2  # v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/gabriels-landing-page
+            git pull origin main
+            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+            docker image prune -f

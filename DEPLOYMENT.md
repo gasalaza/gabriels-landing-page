@@ -1,5 +1,7 @@
 # Deployment Guide — Gabriel's Landing Page
 
+> **Alternative — $0/month VPS:** To self-host on a free Oracle Cloud / GCP box instead of Railway, see [DEPLOYMENT-VPS.md](DEPLOYMENT-VPS.md).
+
 Two-service topology on Railway: a **private backend** (Node/Express + SQLite) and a **public web** service (Caddy serving the SPA + reverse-proxying `/api/*`).
 
 ---
