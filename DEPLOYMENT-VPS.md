@@ -1,8 +1,8 @@
-# Deployment Guide — $0/month VPS (Oracle Cloud A1 + Docker Compose + Caddy + Cloudflare)
+# Deployment Guide — VPS (Oracle Cloud / Hetzner + Docker Compose + Caddy + Cloudflare)
 
 > **Looking for the Railway deployment path?** See [DEPLOYMENT.md](DEPLOYMENT.md).
 
-Same two-service topology as Railway — a **backend** (Node/Express + SQLite) and a **web** service (Caddy serving the SPA + reverse-proxying `/api/*`) — but self-hosted on a free-tier ARM VPS behind Cloudflare.
+Same two-service topology as Railway — a **backend** (Node/Express + SQLite) and a **web** service (Caddy serving the SPA + reverse-proxying `/api/*`) — but self-hosted on a VPS behind Cloudflare. Two host options are documented: Oracle Cloud (free) and Hetzner Cloud (EU, ~€5/mo).
 
 ---
 
@@ -16,6 +16,22 @@ Same two-service topology as Railway — a **backend** (Node/Express + SQLite) a
 | **Best for** | Fast iteration, zero-ops preference | Budget-constrained, levelsio-style single-box |
 
 If you want managed simplicity, use Railway ([DEPLOYMENT.md](DEPLOYMENT.md)). If you want $0/month and don't mind basic server ops, continue here.
+
+---
+
+## 1a. Choose Your Host
+
+| | Oracle Cloud Always Free | Hetzner Cloud CX22 |
+|---|---|---|
+| **Cost** | $0/month (genuinely free tier) | ~€5/month (€3.79 base + €0.50 IPv4 + ~€0.76 backups) |
+| **Specs** | 2 OCPU / 12 GB ARM (A1 Flex) | 2 vCPU / 4 GB / 40 GB (x86) |
+| **Region** | US/EU (varies by capacity) | EU — Nuremberg, Falkenstein, Helsinki |
+| **Pros** | Free; generous RAM | Reliable; GDPR-native EU data residency; real support; no signup lottery |
+| **Cons** | Capacity lottery; reclamation risk on idle instances; slow support | Costs money (modest) |
+
+**TL;DR:** Oracle = $0 but unreliable signup + reclamation risk. Hetzner = €5/mo but predictable, EU-native, and just works. Both feed into the same Docker Compose + Caddy + Cloudflare stack below (§3 onward). Pick one and follow its provisioning section, then continue with §3.
+
+> See [`.squad/decisions.md`](.squad/decisions.md) for the full host comparison.
 
 ---
 
@@ -53,6 +69,110 @@ gcloud compute instances create gabriels-landing \
   --image-project=ubuntu-os-cloud \
   --boot-disk-size=30GB
 ```
+
+---
+
+## 2a. Provisioning — Hetzner Cloud (EU)
+
+Hetzner Cloud is a German hosting provider with datacenters exclusively in EU and US. For this site we **require an EU region** to keep all contact-form data at rest within the EU for GDPR compliance.
+
+### Plan
+
+| Plan | Specs | Base cost |
+|------|-------|-----------|
+| **CX22** (recommended) | 2 vCPU / 4 GB / 40 GB (x86, shared) | €3.79/mo |
+| CAX11 (cheaper alt) | 2 vCPU / 4 GB / 40 GB (ARM, shared) | €3.29/mo |
+
+Add-ons: +€0.50/mo for IPv4, +~20% for automated backups ≈ **€5.05/mo all-in** (CX22). This app uses ~400 MB RAM — 4 GB is plenty.
+
+### Region — EU ONLY
+
+> 🔴 **GDPR requirement:** provision in one of the EU datacenters:
+> - **Falkenstein (fsn1)** — Germany 🇩🇪
+> - **Nuremberg (nbg1)** — Germany 🇩🇪
+> - **Helsinki (hel1)** — Finland 🇫🇮
+>
+> Do NOT use the US locations (Ashburn `ash` / Hillsboro `hil`) for this site. EU data residency keeps all contact-form submissions under EU jurisdiction and simplifies GDPR compliance.
+
+### Steps — via `hcloud` CLI
+
+Install the Hetzner CLI:
+
+```bash
+# macOS
+brew install hcloud
+
+# Linux
+curl -sL https://github.com/hetznercloud/cli/releases/latest/download/hcloud-linux-amd64.tar.gz \
+  | tar xz -C /usr/local/bin hcloud
+```
+
+Authenticate and create the server:
+
+```bash
+# Create a CLI context (prompts for API token from Hetzner Console → Security → API Tokens)
+hcloud context create gabriels-landing
+
+# Upload your SSH public key
+hcloud ssh-key create --name deploy-key --public-key-from-file ~/.ssh/id_ed25519.pub
+
+# Create the server (EU region, backups enabled)
+hcloud server create \
+  --name gabriels-landing \
+  --type cx22 \
+  --image ubuntu-24.04 \
+  --location fsn1 \
+  --ssh-key deploy-key \
+  --enable-backup
+```
+
+> **Web console alternative:** Hetzner Console → Servers → Add Server → select Ubuntu 24.04, CX22, Falkenstein, add your SSH key, enable backups → Create & Buy.
+
+### Networking / Firewall — Hetzner Cloud Firewall
+
+Create a firewall restricting inbound to Cloudflare IPs + your SSH:
+
+```bash
+# Create the firewall
+hcloud firewall create --name cf-only
+
+# Allow SSH from your IP
+hcloud firewall add-rule cf-only --direction in --protocol tcp --port 22 \
+  --source-ips "<YOUR_IP>/32"
+
+# Allow HTTP/HTTPS from Cloudflare IPv4 ranges only
+# (full list: https://www.cloudflare.com/ips-v4/)
+for cidr in 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 \
+            141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 \
+            197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 \
+            104.24.0.0/14 172.64.0.0/13 131.0.72.0/22; do
+  hcloud firewall add-rule cf-only --direction in --protocol tcp --port 80 \
+    --source-ips "$cidr"
+  hcloud firewall add-rule cf-only --direction in --protocol tcp --port 443 \
+    --source-ips "$cidr"
+done
+
+# Apply to the server
+hcloud firewall apply-to-resource cf-only --type server --server gabriels-landing
+```
+
+This mirrors the Oracle Cloud Security List approach (§6). Continue with the host-level ufw setup in §6 as well — defense-in-depth applies to both hosts.
+
+### Storage
+
+SQLite lives on the server's local root volume (40 GB — more than sufficient). No separate block volume needed. See §9 for the backup strategy.
+
+### Hardening
+
+All items in §8 (SSH key-only, fail2ban, unattended-upgrades, `.env` chmod 600, secret rotation) apply identically to Hetzner. The only difference: there is no "OCI Console → Block Storage" encryption-at-rest toggle — Hetzner encrypts underlying storage hardware but doesn't expose a per-volume toggle. Rely on application-layer encryption for off-box backups (§9).
+
+### ⚠️ International-Transfer / DPA Note
+
+> While the server and SQLite database reside in the EU, contact-form data transits US-based processors:
+> - **Resend** (email notifications) — US
+> - **Cloudflare** (CDN/WAF/Analytics) — US
+>
+> These transfers are covered by each vendor's Standard Contractual Clauses (SCCs). **Before launch, accept the [Resend DPA](https://resend.com/legal/dpa) and the [Cloudflare DPA](https://www.cloudflare.com/cloudflare-customer-dpa/).** This is an operational prerequisite, not a technical one.
 
 ---
 
@@ -187,9 +307,9 @@ The goal: only Cloudflare can reach ports 80/443, and only your IP can reach SSH
 
 ### Belt-and-suspenders: both cloud and host layers
 
-#### Layer 1 — Oracle Cloud Security List (or GCP Firewall Rules)
+#### Layer 1 — Cloud-provider firewall (Oracle Security List / Hetzner Cloud Firewall / GCP Firewall Rules)
 
-In OCI Console → Networking → VCN → Security Lists → Default:
+**Oracle:** In OCI Console → Networking → VCN → Security Lists → Default:
 
 | Direction | Source | Protocol | Port | Action |
 |-----------|--------|----------|------|--------|
@@ -212,6 +332,8 @@ In OCI Console → Networking → VCN → Security Lists → Default:
 | Ingress | `0.0.0.0/0` | ALL | ALL | **Drop** (default deny) |
 
 Full, up-to-date list: https://www.cloudflare.com/ips/
+
+**Hetzner:** See §2a — the `hcloud firewall` commands achieve the same result via CLI. If you provisioned via the web console, create the firewall under Firewalls → Add Firewall with the same CIDR rules.
 
 #### Layer 2 — Host firewall (ufw)
 
@@ -275,14 +397,14 @@ curl -sI https://gasalaza.com | head -20          # from your local machine
 - [ ] **🔴 Rotate burned secrets:** the Resend API key and GitHub OAuth Client Secret were pasted in chat — treat them as compromised. Generate new ones before going live:
   - Resend: Dashboard → API Keys → revoke old, create new
   - GitHub OAuth: Settings → Developer settings → OAuth Apps → regenerate secret
-- [ ] **MFA on cloud console:** enable multi-factor authentication on your Oracle Cloud / GCP account
+- [ ] **MFA on cloud console:** enable multi-factor authentication on your Oracle Cloud / GCP / Hetzner account
 
 ### 🟡 SHOULD — within the first week
 
 - [ ] **Move sshd to a high port** (e.g., 2222) or tunnel SSH via `cloudflared` to hide it from scanners
 - [ ] **Dedicated deploy user:** the `deploy` user runs compose; our Dockerfile already specifies `USER node` inside the container ✅
-- [ ] **SQLite file permissions:** `chmod 600` on the `.db`, `-wal`, and `-shm` files; Oracle boot volumes are AES-256 encrypted at rest by default — verify this in the OCI console under Block Storage
-- [ ] **Encrypt off-box backups:** the database contains contact-form PII — use `age` or `gpg` before uploading to R2/B2 (see §9)
+- [ ] **SQLite file permissions:** `chmod 600` on the `.db`, `-wal`, and `-shm` files; Oracle boot volumes are AES-256 encrypted at rest by default — verify in the OCI console under Block Storage. Hetzner encrypts underlying storage hardware but has no per-volume toggle.
+- [ ] **Encrypt off-box backups:** the database contains contact-form PII — use `age` or `gpg` before uploading to R2/B2 (see §9). This is **required** for GDPR compliance when moving backups off the EU server.
 - [ ] **Log rotation:** configure logrotate for app + Caddy logs
   ```bash
   # /etc/logrotate.d/gabriels-landing
@@ -295,7 +417,7 @@ curl -sI https://gasalaza.com | head -20          # from your local machine
   }
   ```
 - [ ] **Uptime monitoring:** set up a free monitor (UptimeRobot or Healthchecks.io) on `https://gasalaza.com/api/health`
-- [ ] **Billing alert:** set a $0/$1 budget alert in OCI/GCP to catch egress-over-10TB abuse
+- [ ] **Billing alert:** set a $0/$1 budget alert in OCI/GCP, or a spending limit in Hetzner, to catch unexpected charges
 
 ### 🟢 NICE to have
 
@@ -343,7 +465,9 @@ Both offer 10 GB free storage. Setup:
 
 > ### ⚠️ Before activating the deploy workflow
 >
-> These steps **cannot be completed until the Oracle/GCP instance is provisioned** and SSH-accessible:
+> The `deploy-vps.yml` workflow is **host-agnostic** — it SSHes to whatever IP you configure. It works identically for Oracle, Hetzner, or GCP.
+>
+> These steps **cannot be completed until the VPS is provisioned** and SSH-accessible:
 >
 > 1. **Populate GitHub Secrets** — add `VPS_HOST`, `VPS_USER`, and `VPS_SSH_KEY` (the deploy user's Ed25519 private key) under **Settings → Secrets and variables → Actions** in the GitHub repo.
 > 2. **Pin the VPS SSH host-key fingerprint** — SSH into the new server, retrieve its host key (`ssh-keyscan -t ed25519 <VPS_IP>`), and store the fingerprint in the workflow's `known_hosts` configuration. The deploy workflow **must** use strict host-key checking against this pinned fingerprint — never use `StrictHostKeyChecking=no`, which is vulnerable to MITM attacks.
@@ -387,5 +511,5 @@ After deployment, verify (same checks as [DEPLOYMENT.md §7](DEPLOYMENT.md)):
 | **Storage** | Railway volume | Host bind-mount (`./data/`) |
 | **Deploy** | Git-push auto-deploy | SSH + `docker compose up` (CI or manual) |
 | **Backups** | Railway volume snapshots | `scripts/backup-sqlite.sh` + cron |
-| **Firewall** | Railway manages infra | You manage: cloud security list + ufw |
-| **Cost** | ~$5–10/month | $0/month (Always Free tier) |
+| **Firewall** | Railway manages infra | You manage: cloud firewall (OCI/Hetzner) + ufw |
+| **Cost** | ~$5–10/month | $0/month (Oracle Free) or ~€5/month (Hetzner EU) |
